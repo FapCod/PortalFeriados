@@ -1,0 +1,129 @@
+import React, { useState } from 'react';
+import type { Holiday } from '../../services/holidayService';
+import type { CustomHoliday } from '../../services/customHolidayService';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { Calendar, Tag, Edit2, Trash2, Star } from 'lucide-react';
+import { useHolidayContext } from '../../context/HolidayContext';
+import { useAuth } from '../../context/AuthContext';
+import { AddHolidayForm } from '../Controls/AddHolidayForm';
+import './HolidayCard.css';
+
+interface HolidayCardProps {
+    holiday: Holiday | CustomHoliday;
+    isCustom?: boolean;
+}
+
+/**
+ * Card component for displaying individual holiday information
+ */
+export const HolidayCard: React.FC<HolidayCardProps> = ({ holiday, isCustom = false }) => {
+    const { deleteCustomHoliday } = useHolidayContext();
+    const { isAdmin } = useAuth();
+    const [showEditForm, setShowEditForm] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    const getTypeLabel = (type: string): string => {
+        const typeMap: Record<string, string> = {
+            public: 'Público',
+            bank: 'Bancario',
+            school: 'Escolar',
+            optional: 'Opcional',
+            observance: 'Conmemoración',
+        };
+        return typeMap[type] || type;
+    };
+
+    const getTypeColor = (type: string): string => {
+        const colorMap: Record<string, string> = {
+            public: 'type-public',
+            bank: 'type-bank',
+            school: 'type-school',
+            optional: 'type-optional',
+            observance: 'type-observance',
+        };
+        return colorMap[type] || 'type-default';
+    };
+
+    const handleDelete = () => {
+        if (isCustom && 'id' in holiday) {
+            deleteCustomHoliday(holiday.id);
+            setShowDeleteConfirm(false);
+        }
+    };
+
+    const customHoliday = isCustom && 'id' in holiday ? (holiday as CustomHoliday) : null;
+
+    return (
+        <>
+            <div className={`holiday-card glass-panel ${isCustom ? 'custom-holiday' : ''}`}>
+                <div className="holiday-card-header">
+                    <div className="holiday-date">
+                        <Calendar size={20} className="holiday-icon" />
+                        <div className="holiday-date-text">
+                            <span className="holiday-day">
+                                {format(holiday.start, 'd', { locale: es })}
+                            </span>
+                            <span className="holiday-month">
+                                {format(holiday.start, 'MMM', { locale: es })}
+                            </span>
+                        </div>
+                    </div>
+                    <div className={`holiday-type ${getTypeColor(holiday.type)}`}>
+                        <Tag size={14} />
+                        <span>{getTypeLabel(holiday.type)}</span>
+                    </div>
+                </div>
+
+                <div className="holiday-content">
+                    <div className="holiday-name-wrapper">
+                        {isCustom && (
+                            <Star size={16} className="custom-icon" fill="currentColor" />
+                        )}
+                        <h3 className="holiday-name">{holiday.name}</h3>
+                    </div>
+
+                    <p className="holiday-full-date">
+                        {format(holiday.start, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
+                    </p>
+                    <AddHolidayForm
+                        isOpen={showEditForm}
+                        onClose={() => setShowEditForm(false)}
+                        editHolidayId={customHoliday.id}
+                        initialData={{
+                            name: customHoliday.name,
+                            date: customHoliday.date,
+                            countryCode: customHoliday.countryCode,
+                            region: customHoliday.region,
+                            type: customHoliday.type,
+                        }}
+                    />
+            )}
+
+                    {showDeleteConfirm && (
+                        <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
+                            <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
+                                <h3 className="confirm-title">¿Eliminar feriado?</h3>
+                                <p className="confirm-message">
+                                    ¿Estás seguro de que deseas eliminar "{holiday.name}"? Esta acción no se puede deshacer.
+                                </p>
+                                <div className="confirm-actions">
+                                    <button
+                                        className="btn btn-ghost"
+                                        onClick={() => setShowDeleteConfirm(false)}
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        className="btn btn-delete"
+                                        onClick={handleDelete}
+                                    >
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>
+                );
+};

@@ -1,0 +1,45 @@
+:root {
+  /* Brand Colors */
+  --primary: #6366f1; /* Indigo 500 */
+  --primary-hover: #4f46e5; /* Indigo 600 */
+  --secondary: #ec4899; /* Pink 500 */
+  --accent: #8b5cf6; /* Violet 500 */
+
+  /* Backgrounds */
+  --bg-body: #f8fafc; /* Slate 50 */
+  --bg-card: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.7);
+
+  /* Text */
+  --text-main: #1e293b; /* Slate 800 */
+  --text-muted: #64748b; /* Slate 500 */
+  --text-light: #f1f5f9; /* Slate 100 */
+
+  /* Borders & Shadows */
+  --border-color: #e2e8f0; /* Slate 200 */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Spacing */
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 300ms ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-body: #0f172a; /* Slate 900 */
+    --bg-card: #1e293b; /* Slate 800 */
+    --bg-glass: rgba(30, 41, 59, 0.7);
+
+    --text-main: #f1f5f9; /* Slate 100 */
+    --text-muted: #94a3b8; /* Slate 400 */
+    
+    --border-color: #334155; /* Slate 700 */
+  }
+}

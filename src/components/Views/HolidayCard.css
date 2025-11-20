@@ -1,0 +1,265 @@
+.holiday-card {
+    padding: 1.25rem;
+    transition: all var(--transition-normal);
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+}
+
+.holiday-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition-normal);
+}
+
+.holiday-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.holiday-card:hover::before {
+    transform: scaleX(1);
+}
+
+/* Custom holiday styling */
+.holiday-card.custom-holiday {
+    border: 2px solid var(--accent);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(236, 72, 153, 0.05));
+}
+
+.holiday-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.holiday-date {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.holiday-icon {
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.holiday-date-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.holiday-day {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.holiday-month {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.holiday-type {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.type-public {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+
+.type-bank {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+}
+
+.type-school {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.type-optional {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+}
+
+.type-observance {
+    background: rgba(139, 92, 246, 0.1);
+    color: #7c3aed;
+}
+
+.type-default {
+    background: rgba(107, 114, 128, 0.1);
+    color: #4b5563;
+}
+
+.holiday-content {
+    flex: 1;
+}
+
+.holiday-name-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.custom-icon {
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.holiday-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.holiday-full-date {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+    text-transform: capitalize;
+}
+
+.holiday-region {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0.5rem 0 0 0;
+    font-style: italic;
+}
+
+.holiday-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: transparent;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.edit-btn {
+    color: var(--primary);
+}
+
+.edit-btn:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: var(--primary);
+}
+
+.delete-btn {
+    color: #dc2626;
+}
+
+.delete-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #dc2626;
+}
+
+/* Confirmation dialog */
+.confirm-dialog {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: var(--shadow-lg);
+}
+
+.confirm-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 0.75rem 0;
+}
+
+.confirm-message {
+    color: var(--text-muted);
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.btn-delete {
+    background-color: #dc2626;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-delete:hover {
+    background-color: #b91c1c;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+    .holiday-card {
+        padding: 1rem;
+    }
+
+    .holiday-card-header {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .holiday-type {
+        align-self: flex-start;
+    }
+
+    .confirm-actions {
+        flex-direction: column-reverse;
+    }
+
+    .confirm-actions .btn {
+        width: 100%;
+    }
+}
