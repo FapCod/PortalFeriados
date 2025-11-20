@@ -82,34 +82,11 @@
     font-weight: 600;
 }
 
-.calendar-day.has-holiday:hover {
-    transform: scale(1.1);
-    box-shadow: var(--shadow-md);
-    z-index: 10;
-}
-
-.calendar-day-number {
-    font-size: 0.875rem;
-    color: var(--text-main);
-    z-index: 1;
-}
-
-.calendar-day-indicator {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    position: absolute;
-    bottom: 4px;
-}
-
-.calendar-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 2rem;
-    text-align: center;
-    min-height: 400px;
+align-items: center;
+justify-content: center;
+padding: 4rem 2rem;
+text-align: center;
+min-height: 400px;
 }
 
 .calendar-legend {

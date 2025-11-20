@@ -57,8 +57,8 @@ export const HolidayCalendar: React.FC = () => {
         });
     }, [selectedYear]);
 
-    const getHolidayForDay = (day: Date): Holiday | undefined => {
-        return holidays.find(holiday => isSameDay(new Date(holiday.start), day));
+    const getHolidaysForDay = (day: Date): Holiday[] => {
+        return holidays.filter(holiday => isSameDay(new Date(holiday.start), day));
     };
 
     const getTypeColor = (type: string): string => {
@@ -117,27 +117,37 @@ export const HolidayCalendar: React.FC = () => {
                                 ))}
 
                                 {month.days.map((day, dayIndex) => {
-                                    const holiday = getHolidayForDay(day);
+                                    const dayHolidays = getHolidaysForDay(day);
                                     const isWeekend = getDay(day) === 0 || getDay(day) === 6;
+                                    const hasHolidays = dayHolidays.length > 0;
 
                                     return (
                                         <div
                                             key={dayIndex}
-                                            className={`calendar-day ${isWeekend ? 'weekend' : ''} ${holiday ? 'has-holiday' : ''
+                                            className={`calendar-day ${isWeekend ? 'weekend' : ''} ${hasHolidays ? 'has-holiday' : ''
                                                 }`}
                                             style={
-                                                holiday
-                                                    ? { backgroundColor: `${getTypeColor(holiday.type)}15` }
+                                                hasHolidays
+                                                    ? { backgroundColor: `${getTypeColor(dayHolidays[0].type)}15` }
                                                     : undefined
                                             }
-                                            title={holiday ? holiday.name : undefined}
+                                            title={hasHolidays ? dayHolidays.map(h => h.name).join(', ') : undefined}
                                         >
                                             <span className="calendar-day-number">{format(day, 'd')}</span>
-                                            {holiday && (
-                                                <div
-                                                    className="calendar-day-indicator"
-                                                    style={{ backgroundColor: getTypeColor(holiday.type) }}
-                                                />
+                                            {hasHolidays && (
+                                                <div className="calendar-day-indicators">
+                                                    {dayHolidays.slice(0, 3).map((holiday, idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            className="calendar-day-indicator"
+                                                            style={{ backgroundColor: getTypeColor(holiday.type) }}
+                                                            title={holiday.name}
+                                                        />
+                                                    ))}
+                                                    {dayHolidays.length > 3 && (
+                                                        <span className="calendar-day-more">+{dayHolidays.length - 3}</span>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
                                     );
