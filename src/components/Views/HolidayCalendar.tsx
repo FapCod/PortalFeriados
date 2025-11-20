@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { useHolidayContext } from '../../context/HolidayContext';
 import { holidayService } from '../../services/holidayService';
 import type { Holiday } from '../../services/holidayService';
-import type { CustomHoliday } from '../../services/customHolidayService';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, getDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AlertCircle } from 'lucide-react';
