@@ -40,7 +40,9 @@ export const HolidayCalendar: React.FC = () => {
             rule: `Custom holiday for ${ch.countryCode}`,
         }));
 
-        return [...filteredOfficial, ...customAsHolidays];
+        const merged = [...filteredOfficial, ...customAsHolidays];
+        console.log('Total holidays:', merged.length, 'Official:', filteredOfficial.length, 'Custom:', customAsHolidays.length);
+        return merged;
     }, [selectedCountry, selectedYear, filterType, customHolidays]);
 
     const months = useMemo(() => {
@@ -58,7 +60,14 @@ export const HolidayCalendar: React.FC = () => {
     }, [selectedYear]);
 
     const getHolidaysForDay = (day: Date): Holiday[] => {
-        return holidays.filter(holiday => isSameDay(new Date(holiday.start), day));
+        const dayHolidays = holidays.filter(holiday => {
+            const holidayDate = holiday.start instanceof Date ? holiday.start : new Date(holiday.start);
+            return isSameDay(holidayDate, day);
+        });
+        if (dayHolidays.length > 1) {
+            console.log(`Day ${format(day, 'yyyy-MM-dd')} has ${dayHolidays.length} holidays:`, dayHolidays.map(h => h.name));
+        }
+        return dayHolidays;
     };
 
     const getTypeColor = (type: string): string => {
