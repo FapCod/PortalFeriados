@@ -59,7 +59,11 @@ export const HolidayCalendar: React.FC = () => {
 
     const getHolidaysForDay = (day: Date): Holiday[] => {
         const dayHolidays = holidays.filter(holiday => {
-            const holidayDate = holiday.start instanceof Date ? holiday.start : new Date(holiday.start);
+            // Use the 'date' field which is in format "YYYY-MM-DD HH:MM:SS" (local time)
+            // NOT the 'start' field which is ISO UTC and causes timezone issues
+            const dateParts = holiday.date.split(' ')[0]; // Get "YYYY-MM-DD" part
+            const [year, month, dayNum] = dateParts.split('-').map(Number);
+            const holidayDate = new Date(year, month - 1, dayNum); // Create in local timezone
             return isSameDay(holidayDate, day);
         });
         return dayHolidays;
