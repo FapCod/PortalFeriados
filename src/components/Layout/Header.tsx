@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Calendar, LogIn, LogOut, Shield, User } from 'lucide-react';
+import { Calendar, LogIn, LogOut, Shield, User, Plus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { LoginForm } from '../Auth/LoginForm';
+import { AddHolidayForm } from '../Controls/AddHolidayForm';
 import './Header.css';
 
 /**
@@ -10,6 +11,7 @@ import './Header.css';
 export const Header: React.FC = () => {
     const { isAuthenticated, isAdmin, session, logout } = useAuth();
     const [showLoginForm, setShowLoginForm] = useState(false);
+    const [showAddHolidayForm, setShowAddHolidayForm] = useState(false);
 
     const handleLogout = () => {
         logout();
@@ -25,6 +27,17 @@ export const Header: React.FC = () => {
                     </div>
 
                     <div className="header-auth">
+                        {isAdmin && (
+                            <button
+                                onClick={() => setShowAddHolidayForm(true)}
+                                className="header-add-btn"
+                                title="Agregar feriado"
+                            >
+                                <Plus size={18} />
+                                <span>Agregar Feriado</span>
+                            </button>
+                        )}
+
                         {isAuthenticated ? (
                             <>
                                 <div className="header-user">
@@ -50,6 +63,12 @@ export const Header: React.FC = () => {
             </header>
 
             {showLoginForm && <LoginForm onClose={() => setShowLoginForm(false)} />}
+            {showAddHolidayForm && (
+                <AddHolidayForm
+                    isOpen={showAddHolidayForm}
+                    onClose={() => setShowAddHolidayForm(false)}
+                />
+            )}
         </>
     );
 };

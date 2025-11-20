@@ -68,6 +68,7 @@
     font-weight: 500;
 }
 
+.header-add-btn,
 .header-login-btn,
 .header-logout-btn {
     display: flex;
@@ -85,6 +86,12 @@
     transition: all 0.3s;
 }
 
+.header-add-btn {
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+    border: none;
+}
+
+.header-add-btn:hover,
 .header-login-btn:hover,
 .header-logout-btn:hover {
     background: rgba(255, 255, 255, 0.25);
@@ -92,6 +99,12 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
+.header-add-btn:hover {
+    background: linear-gradient(135deg, #6573e6, #8499e0);
+    box-shadow: 0 4px 12px rgba(88, 101, 242, 0.4);
+}
+
+.header-add-btn:active,
 .header-login-btn:active,
 .header-logout-btn:active {
     transform: translateY(0);
@@ -127,11 +140,13 @@
         display: none;
     }
 
+    .header-add-btn span,
     .header-login-btn span,
     .header-logout-btn span {
         display: none;
     }
 
+    .header-add-btn,
     .header-login-btn,
     .header-logout-btn {
         padding: 10px;

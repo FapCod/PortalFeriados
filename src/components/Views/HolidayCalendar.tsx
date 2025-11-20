@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useHolidayContext } from '../../context/HolidayContext';
 import { holidayService } from '../../services/holidayService';
 import type { Holiday } from '../../services/holidayService';
+import type { CustomHoliday } from '../../services/customHolidayService';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, getDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AlertCircle } from 'lucide-react';
@@ -11,14 +12,37 @@ import './HolidayCalendar.css';
  * Calendar view component for displaying holidays
  */
 export const HolidayCalendar: React.FC = () => {
-    const { selectedCountry, selectedYear, filterType } = useHolidayContext();
+    const { selectedCountry, selectedYear, filterType, customHolidays } = useHolidayContext();
 
     const holidays = useMemo(() => {
         if (!selectedCountry) return [];
 
-        const allHolidays = holidayService.getHolidays(selectedCountry.code, selectedYear);
-        return holidayService.filterByType(allHolidays, filterType);
-    }, [selectedCountry, selectedYear, filterType]);
+        // Get official holidays
+        const officialHolidays = holidayService.getHolidays(selectedCountry.code, selectedYear);
+        const filteredOfficial = holidayService.filterByType(officialHolidays, filterType);
+
+        // Get custom holidays for selected country/year
+        const customForCountry = customHolidays.filter(
+            h => h.countryCode === selectedCountry.code && new Date(h.date).getFullYear() === selectedYear
+        );
+
+        // Filter custom holidays by type
+        const filteredCustom = filterType === 'all'
+            ? customForCountry
+            : customForCountry.filter(h => h.type === filterType);
+
+        // Convert custom holidays to Holiday format and merge
+        const customAsHolidays: Holiday[] = filteredCustom.map(ch => ({
+            name: ch.name,
+            type: ch.type,
+            start: new Date(ch.date),
+            end: new Date(ch.date),
+            date: ch.date,
+            rule: `Custom holiday for ${ch.countryCode}`,
+        }));
+
+        return [...filteredOfficial, ...customAsHolidays];
+    }, [selectedCountry, selectedYear, filterType, customHolidays]);
 
     const months = useMemo(() => {
         return Array.from({ length: 12 }, (_, i) => {
