@@ -86,44 +86,73 @@ export const HolidayCard: React.FC<HolidayCardProps> = ({ holiday, isCustom = fa
                     <p className="holiday-full-date">
                         {format(holiday.start, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
                     </p>
-                    <AddHolidayForm
-                        isOpen={showEditForm}
-                        onClose={() => setShowEditForm(false)}
-                        editHolidayId={customHoliday.id}
-                        initialData={{
-                            name: customHoliday.name,
-                            date: customHoliday.date,
-                            countryCode: customHoliday.countryCode,
-                            region: customHoliday.region,
-                            type: customHoliday.type,
-                        }}
-                    />
+
+                    {customHoliday?.region && (
+                        <p className="holiday-region">📍 {customHoliday.region}</p>
+                    )}
+                </div>
+
+                {isCustom && customHoliday && isAdmin && (
+                    <div className="holiday-actions">
+                        <button
+                            className="action-btn edit-btn"
+                            onClick={() => setShowEditForm(true)}
+                            aria-label="Editar feriado"
+                        >
+                            <Edit2 size={16} />
+                            <span>Editar</span>
+                        </button>
+                        <button
+                            className="action-btn delete-btn"
+                            onClick={() => setShowDeleteConfirm(true)}
+                            aria-label="Eliminar feriado"
+                        >
+                            <Trash2 size={16} />
+                            <span>Eliminar</span>
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {showEditForm && customHoliday && (
+                <AddHolidayForm
+                    isOpen={showEditForm}
+                    onClose={() => setShowEditForm(false)}
+                    editHolidayId={customHoliday.id}
+                    initialData={{
+                        name: customHoliday.name,
+                        date: customHoliday.date,
+                        countryCode: customHoliday.countryCode,
+                        region: customHoliday.region,
+                        type: customHoliday.type,
+                    }}
+                />
             )}
 
-                    {showDeleteConfirm && (
-                        <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
-                            <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
-                                <h3 className="confirm-title">¿Eliminar feriado?</h3>
-                                <p className="confirm-message">
-                                    ¿Estás seguro de que deseas eliminar "{holiday.name}"? Esta acción no se puede deshacer.
-                                </p>
-                                <div className="confirm-actions">
-                                    <button
-                                        className="btn btn-ghost"
-                                        onClick={() => setShowDeleteConfirm(false)}
-                                    >
-                                        Cancelar
-                                    </button>
-                                    <button
-                                        className="btn btn-delete"
-                                        onClick={handleDelete}
-                                    >
-                                        Eliminar
-                                    </button>
-                                </div>
-                            </div>
+            {showDeleteConfirm && (
+                <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
+                    <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="confirm-title">¿Eliminar feriado?</h3>
+                        <p className="confirm-message">
+                            ¿Estás seguro de que deseas eliminar "{holiday.name}"? Esta acción no se puede deshacer.
+                        </p>
+                        <div className="confirm-actions">
+                            <button
+                                className="btn btn-ghost"
+                                onClick={() => setShowDeleteConfirm(false)}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                className="btn btn-delete"
+                                onClick={handleDelete}
+                            >
+                                Eliminar
+                            </button>
                         </div>
-                    )}
-                </>
-                );
+                    </div>
+                </div>
+            )}
+        </>
+    );
 };
