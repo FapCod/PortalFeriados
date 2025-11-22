@@ -1,74 +1,103 @@
-import React, { useState } from 'react';
-import { Calendar, LogIn, LogOut, Shield, User, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { Calendar, User, LogOut, Plus, Settings, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { LoginForm } from '../Auth/LoginForm';
+import { useTheme } from '../../context/ThemeContext';
 import { AddHolidayForm } from '../Controls/AddHolidayForm';
+import { HolidayTypeManager } from '../Admin/HolidayTypeManager';
+import { LoginForm } from '../Auth/LoginForm';
 import './Header.css';
 
-/**
- * Application header component
- */
-export const Header: React.FC = () => {
-    const { isAuthenticated, isAdmin, session, logout } = useAuth();
-    const [showLoginForm, setShowLoginForm] = useState(false);
-    const [showAddHolidayForm, setShowAddHolidayForm] = useState(false);
-
-    const handleLogout = () => {
-        logout();
-    };
+export const Header = () => {
+    const { session, logout, isAdmin } = useAuth();
+    const { theme, toggleTheme } = useTheme();
+    const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+    const [isTypeManagerOpen, setIsTypeManagerOpen] = useState(false);
+    const [isLoginOpen, setIsLoginOpen] = useState(false);
 
     return (
-        <>
-            <header className="header">
-                <div className="header-content">
-                    <div className="header-brand">
-                        <Calendar className="header-icon" size={28} />
-                        <span className="header-title">Portal de Feriados</span>
-                    </div>
+        <header className="header">
+            <div className="header-content">
+                <div className="header-brand">
+                    <Calendar className="header-icon" size={32} />
+                    <h1 className="header-title">Portal de Feriados</h1>
+                </div>
 
-                    <div className="header-auth">
-                        {isAdmin && (
-                            <button
-                                onClick={() => setShowAddHolidayForm(true)}
-                                className="header-add-btn"
-                                title="Agregar feriado"
-                            >
-                                <Plus size={18} />
-                                <span>Agregar Feriado</span>
-                            </button>
-                        )}
+                <div className="header-auth">
+                    <button
+                        className="header-theme-btn"
+                        onClick={toggleTheme}
+                        title={`Cambiar a modo ${theme === 'light' ? 'oscuro' : 'claro'}`}
+                    >
+                        {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+                    </button>
 
-                        {isAuthenticated ? (
-                            <>
-                                <div className="header-user">
-                                    {isAdmin ? <Shield size={18} /> : <User size={18} />}
-                                    <span className="header-username">{session?.username}</span>
-                                    <span className="header-role">
-                                        {isAdmin ? 'Admin' : 'Invitado'}
-                                    </span>
-                                </div>
-                                <button onClick={handleLogout} className="header-logout-btn" title="Cerrar sesión">
-                                    <LogOut size={18} />
-                                    <span>Salir</span>
-                                </button>
-                            </>
-                        ) : (
-                            <button onClick={() => setShowLoginForm(true)} className="header-login-btn" title="Iniciar sesión">
-                                <LogIn size={18} />
-                                <span>Iniciar Sesión</span>
+                    {session ? (
+                        <>
+                            <div className="header-user">
+                                <User size={18} />
+                                <span className="header-username">{session.username}</span>
+                                <span className="header-role">{isAdmin ? 'Admin' : 'Invitado'}</span>
+                            </div>
+
+                            {isAdmin && (
+                                <>
+                                    <button
+                                        className="header-types-btn"
+                                        onClick={() => setIsTypeManagerOpen(true)}
+                                        title="Gestionar Tipos de Feriado"
+                                    >
+                                        <Settings size={18} />
+                                        <span>Tipos</span>
+                                    </button>
+                                    <button
+                                        className="header-add-btn"
+                                        onClick={() => setIsAddFormOpen(true)}
+                                    >
+                                        <Plus size={18} />
+                                        <span>Agregar Feriado</span>
+                                    </button>
+                                </>
+                            )}
+
+                            <button onClick={logout} className="header-logout-btn" title="Cerrar Sesión">
+                                <LogOut size={18} />
+                                <span>Salir</span>
                             </button>
-                        )}
+                        </>
+                    ) : (
+                        <button
+                            className="header-login-btn"
+                            onClick={() => setIsLoginOpen(true)}
+                        >
+                            <User size={18} />
+                            <span>Iniciar Sesión</span>
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {isAddFormOpen && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <button
+                            className="modal-close"
+                            onClick={() => setIsAddFormOpen(false)}
+                        >
+                            ×
+                        </button>
+                        <AddHolidayForm onSuccess={() => setIsAddFormOpen(false)} isOpen={isAddFormOpen} onClose={() => setIsAddFormOpen(false)} />
                     </div>
                 </div>
-            </header>
-
-            {showLoginForm && <LoginForm onClose={() => setShowLoginForm(false)} />}
-            {showAddHolidayForm && (
-                <AddHolidayForm
-                    isOpen={showAddHolidayForm}
-                    onClose={() => setShowAddHolidayForm(false)}
-                />
             )}
-        </>
+
+            <HolidayTypeManager
+                isOpen={isTypeManagerOpen}
+                onClose={() => setIsTypeManagerOpen(false)}
+            />
+
+            {isLoginOpen && (
+                <LoginForm onClose={() => setIsLoginOpen(false)} />
+            )}
+        </header>
     );
 };

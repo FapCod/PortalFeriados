@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useHolidayContext } from '../../context/HolidayContext';
 import { holidayService } from '../../services/holidayService';
 import type { Holiday } from '../../services/holidayService';
+import { holidayTypeService } from '../../services/holidayTypeService';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, getDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AlertCircle } from 'lucide-react';
@@ -61,6 +62,7 @@ export const HolidayCalendar: React.FC = () => {
         const dayHolidays = holidays.filter(holiday => {
             // Use the 'date' field which is in format "YYYY-MM-DD HH:MM:SS" (local time)
             // NOT the 'start' field which is ISO UTC and causes timezone issues
+            if (!holiday.date) return false;
             const dateParts = holiday.date.split(' ')[0]; // Get "YYYY-MM-DD" part
             const [year, month, dayNum] = dateParts.split('-').map(Number);
             const holidayDate = new Date(year, month - 1, dayNum); // Create in local timezone
@@ -70,14 +72,7 @@ export const HolidayCalendar: React.FC = () => {
     };
 
     const getTypeColor = (type: string): string => {
-        const colorMap: Record<string, string> = {
-            public: '#dc2626',
-            bank: '#2563eb',
-            school: '#059669',
-            optional: '#d97706',
-            observance: '#7c3aed',
-        };
-        return colorMap[type] || '#4b5563';
+        return holidayTypeService.getColorForType(type);
     };
 
     if (!selectedCountry) {
@@ -177,11 +172,7 @@ export const HolidayCalendar: React.FC = () => {
                                     style={{ backgroundColor: getTypeColor(type) }}
                                 />
                                 <span className="legend-label">
-                                    {type === 'public' ? 'Público' :
-                                        type === 'bank' ? 'Bancario' :
-                                            type === 'school' ? 'Escolar' :
-                                                type === 'optional' ? 'Opcional' :
-                                                    type === 'observance' ? 'Conmemoración' : type}
+                                    {holidayTypeService.getTypeById(type)?.name || type}
                                 </span>
                             </div>
                         ))}

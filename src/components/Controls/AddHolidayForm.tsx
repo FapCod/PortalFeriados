@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useHolidayContext } from '../../context/HolidayContext';
 import { holidayService } from '../../services/holidayService';
+import { holidayTypeService } from '../../services/holidayTypeService';
 import type { CustomHolidayFormData } from '../../services/customHolidayService';
 import { X, Calendar, Globe, MapPin, Tag, AlertCircle } from 'lucide-react';
 import './AddHolidayForm.css';
@@ -8,6 +9,7 @@ import './AddHolidayForm.css';
 interface AddHolidayFormProps {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess?: () => void;
     editHolidayId?: string;
     initialData?: CustomHolidayFormData;
 }
@@ -18,6 +20,7 @@ interface AddHolidayFormProps {
 export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
     isOpen,
     onClose,
+    onSuccess,
     editHolidayId,
     initialData,
 }) => {
@@ -37,13 +40,10 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
     const [errors, setErrors] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const holidayTypes = [
-        { value: 'public', label: 'Público' },
-        { value: 'bank', label: 'Bancario' },
-        { value: 'school', label: 'Escolar' },
-        { value: 'optional', label: 'Opcional' },
-        { value: 'observance', label: 'Conmemoración' },
-    ];
+    const holidayTypes = holidayTypeService.getAllTypes().map(t => ({
+        value: t.id,
+        label: t.name
+    }));
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -58,6 +58,7 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
 
         if (result.success) {
             onClose();
+            if (onSuccess) onSuccess();
             // Reset form
             setFormData({
                 name: '',

@@ -1,17 +1,19 @@
 .header {
-    background: #1a1d29;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--header-border);
     padding: 1.25rem 0;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 24px var(--shadow-color);
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .header-content {
-    max-width: 1400px;
+    max-width: 100%;
+    width: 100%;
     margin: 0 auto;
-    padding: 0 var(--spacing-md);
+    padding: 0 var(--spacing-lg);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -24,23 +26,23 @@
 }
 
 .header-icon {
-    color: white;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    color: var(--text-color);
+    filter: drop-shadow(0 2px 4px var(--shadow-color));
     animation: float 3s ease-in-out infinite;
 }
 
 .header-title {
     font-size: 1.75rem;
     font-weight: 700;
-    color: white;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    color: var(--text-color);
+    text-shadow: 0 2px 4px var(--shadow-color);
     letter-spacing: -0.5px;
 }
 
 .header-auth {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: 1rem;
 }
 
 .header-user {
@@ -48,11 +50,11 @@
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--button-bg);
     backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
+    color: var(--text-color);
 }
 
 .header-username {
@@ -63,23 +65,25 @@
 .header-role {
     font-size: 12px;
     padding: 2px 8px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(128, 128, 128, 0.2);
     border-radius: 4px;
     font-weight: 500;
 }
 
 .header-add-btn,
+.header-types-btn,
 .header-login-btn,
-.header-logout-btn {
+.header-logout-btn,
+.header-theme-btn {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--button-bg);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    color: white;
+    color: var(--text-color);
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
@@ -87,16 +91,25 @@
 }
 
 .header-add-btn {
-    background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+    background: linear-gradient(135deg, var(--primary), var(--accent));
     border: none;
+    color: white;
+}
+
+.header-types-btn {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    border: none;
+    color: white;
 }
 
 .header-add-btn:hover,
+.header-types-btn:hover,
 .header-login-btn:hover,
-.header-logout-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
+.header-logout-btn:hover,
+.header-theme-btn:hover {
+    background: var(--button-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .header-add-btn:hover {
@@ -104,9 +117,16 @@
     box-shadow: 0 4px 12px rgba(88, 101, 242, 0.4);
 }
 
+.header-types-btn:hover {
+    background: linear-gradient(135deg, #fb923c, #fdba74);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
 .header-add-btn:active,
+.header-types-btn:active,
 .header-login-btn:active,
-.header-logout-btn:active {
+.header-logout-btn:active,
+.header-theme-btn:active {
     transform: translateY(0);
 }
 
@@ -124,8 +144,14 @@
 
 @media (max-width: 768px) {
     .header-content {
+        padding: 0 1rem;
         flex-direction: row;
-        gap: var(--spacing-sm);
+        gap: 0.5rem;
+    }
+
+    .header-auth {
+        gap: 0.5rem;
+        flex-wrap: wrap;
     }
 
     .header-title {
@@ -141,12 +167,14 @@
     }
 
     .header-add-btn span,
+    .header-types-btn span,
     .header-login-btn span,
     .header-logout-btn span {
         display: none;
     }
 
     .header-add-btn,
+    .header-types-btn,
     .header-login-btn,
     .header-logout-btn {
         padding: 10px;

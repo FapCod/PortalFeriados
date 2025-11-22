@@ -1,6 +1,7 @@
 import React from 'react';
 import { useHolidayContext } from '../../context/HolidayContext';
 import { holidayService, HolidayType } from '../../services/holidayService';
+import { holidayTypeService } from '../../services/holidayTypeService';
 import { Calendar as CalendarIcon, List, Filter } from 'lucide-react';
 import './Filters.css';
 
@@ -25,11 +26,10 @@ export const Filters: React.FC = () => {
 
     const holidayTypes = [
         { value: HolidayType.ALL, label: 'Todos' },
-        { value: HolidayType.PUBLIC, label: 'Públicos' },
-        { value: HolidayType.BANK, label: 'Bancarios' },
-        { value: HolidayType.SCHOOL, label: 'Escolares' },
-        { value: HolidayType.OBSERVANCE, label: 'Conmemoraciones' },
-        { value: HolidayType.OPTIONAL, label: 'Opcionales' },
+        ...holidayTypeService.getAllTypes().map(t => ({
+            value: t.id,
+            label: t.name
+        }))
     ];
 
     return (

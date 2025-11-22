@@ -1,73 +1,72 @@
-# React + TypeScript + Vite
+# Portal de Feriados
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Una aplicación web moderna para visualizar y gestionar días festivos en Latinoamérica. Construida con React, TypeScript y Vite.
 
-Currently, two official plugins are available:
+## Características
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Visualización de Feriados:** Vista de calendario y lista para múltiples países.
+- **Gestión de Feriados Personalizados:** Agregue sus propios feriados (guardados localmente).
+- **Gestión de Tipos de Feriado:** Administre tipos de feriados con colores personalizados (Solo Admin).
+- **Autenticación:** Sistema de login simulado (Admin/Invitado).
+- **Temas:** Modo Claro y Oscuro con persistencia.
+- **Diseño Responsivo:** Adaptado a dispositivos móviles y escritorio.
 
-## React Compiler
+## Requisitos Previos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Asegúrese de tener instalado **Node.js** (versión 18 o superior) en su sistema.
+Puede verificarlo ejecutando:
+```bash
+node -v
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Instalación
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1.  Clone el repositorio o descargue el código fuente.
+2.  Abra una terminal en la carpeta raíz del proyecto.
+3.  Instale las dependencias ejecutando:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+## Ejecutar el Proyecto (Desarrollo)
+
+Para iniciar la aplicación en modo de desarrollo (con recarga automática):
+
+```bash
+npm run dev
+```
+
+Esto iniciará el servidor local, generalmente en `http://localhost:5173`. Abra esa URL en su navegador.
+
+## Construir para Producción
+
+Para generar los archivos optimizados para producción:
+
+```bash
+npm run build
+```
+
+Los archivos generados estarán en la carpeta `dist`.
+
+Para previsualizar la versión de producción localmente:
+
+```bash
+npm run preview
+```
+
+## Estructura del Proyecto
+
+- `src/components`: Componentes de React (Vistas, Controles, Layout, Admin).
+- `src/context`: Contextos de React (Auth, Holiday, Theme).
+- `src/services`: Lógica de negocio y manejo de datos.
+- `src/styles`: Estilos globales y variables CSS.
+
+## Credenciales de Prueba
+
+- **Admin:**
+    - Usuario: `admin`
+    - Contraseña: `admin123`
+- **Invitado:**
+    - Usuario: `guest`
+    - Contraseña: `guest123`

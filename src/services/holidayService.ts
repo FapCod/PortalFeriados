@@ -152,15 +152,31 @@ class HolidayService {
       this.hd.init(countryCode);
       const result = this.hd.isHoliday(date);
 
-      if (result && typeof result !== 'boolean') {
-        return {
-          date: String(result.date || ''),
-          start: new Date(result.start),
-          end: new Date(result.end),
-          name: String(result.name || 'Unknown Holiday'),
-          type: String(result.type || 'public'),
-          rule: String(result.rule || '')
-        };
+      if (result) {
+        // Handle array result (multiple holidays on same day)
+        if (Array.isArray(result)) {
+          const h = result[0];
+          return {
+            date: String(h.date || ''),
+            start: new Date(h.start),
+            end: new Date(h.end),
+            name: String(h.name || 'Unknown Holiday'),
+            type: String(h.type || 'public'),
+            rule: String(h.rule || '')
+          };
+        } else {
+          // Handle single object result
+          // Cast to any to avoid TypeScript inference issues with the library types
+          const h = result as any;
+          return {
+            date: String(h.date || ''),
+            start: new Date(h.start),
+            end: new Date(h.end),
+            name: String(h.name || 'Unknown Holiday'),
+            type: String(h.type || 'public'),
+            rule: String(h.rule || '')
+          };
+        }
       }
       return false;
     } catch (error) {

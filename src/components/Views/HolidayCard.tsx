@@ -7,6 +7,7 @@ import { Calendar, Tag, Edit2, Trash2, Star } from 'lucide-react';
 import { useHolidayContext } from '../../context/HolidayContext';
 import { useAuth } from '../../context/AuthContext';
 import { AddHolidayForm } from '../Controls/AddHolidayForm';
+import { holidayTypeService } from '../../services/holidayTypeService';
 import './HolidayCard.css';
 
 interface HolidayCardProps {
@@ -14,9 +15,6 @@ interface HolidayCardProps {
     isCustom?: boolean;
 }
 
-/**
- * Card component for displaying individual holiday information
- */
 export const HolidayCard: React.FC<HolidayCardProps> = ({ holiday, isCustom = false }) => {
     const { deleteCustomHoliday } = useHolidayContext();
     const { isAdmin } = useAuth();
@@ -24,25 +22,12 @@ export const HolidayCard: React.FC<HolidayCardProps> = ({ holiday, isCustom = fa
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const getTypeLabel = (type: string): string => {
-        const typeMap: Record<string, string> = {
-            public: 'Público',
-            bank: 'Bancario',
-            school: 'Escolar',
-            optional: 'Opcional',
-            observance: 'Conmemoración',
-        };
-        return typeMap[type] || type;
+        const typeDef = holidayTypeService.getTypeById(type);
+        return typeDef ? typeDef.name : type;
     };
 
     const getTypeColor = (type: string): string => {
-        const colorMap: Record<string, string> = {
-            public: 'type-public',
-            bank: 'type-bank',
-            school: 'type-school',
-            optional: 'type-optional',
-            observance: 'type-observance',
-        };
-        return colorMap[type] || 'type-default';
+        return holidayTypeService.getColorForType(type);
     };
 
     const handleDelete = () => {
@@ -69,7 +54,10 @@ export const HolidayCard: React.FC<HolidayCardProps> = ({ holiday, isCustom = fa
                             </span>
                         </div>
                     </div>
-                    <div className={`holiday-type ${getTypeColor(holiday.type)}`}>
+                    <div
+                        className="holiday-type"
+                        style={{ backgroundColor: getTypeColor(holiday.type) }}
+                    >
                         <Tag size={14} />
                         <span>{getTypeLabel(holiday.type)}</span>
                     </div>

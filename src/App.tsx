@@ -20,15 +20,19 @@ function AppContent() {
   );
 }
 
+import { ThemeProvider } from './context/ThemeContext';
+
 /**
  * Root application component with context providers
  */
 function App() {
   return (
     <AuthProvider>
-      <HolidayProvider>
-        <AppContent />
-      </HolidayProvider>
+      <ThemeProvider>
+        <HolidayProvider>
+          <AppContent />
+        </HolidayProvider>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

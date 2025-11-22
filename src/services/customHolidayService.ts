@@ -1,4 +1,5 @@
 import type { Holiday } from './holidayService';
+import { holidayTypeService } from './holidayTypeService';
 
 /**
  * Custom holiday with additional metadata
@@ -86,7 +87,9 @@ class CustomHolidayService {
         }
 
         // Type validation
-        const validTypes = ['public', 'bank', 'school', 'optional', 'observance'];
+        const allTypes = holidayTypeService.getAllTypes();
+        const validTypes = allTypes.map(t => t.id);
+
         if (!data.type || !validTypes.includes(data.type)) {
             errors.push('Tipo de feriado inválido');
         }
@@ -130,6 +133,7 @@ class CustomHolidayService {
                         holiday.id &&
                         holiday.name &&
                         holiday.countryCode &&
+                        holiday.date &&
                         !isNaN(holiday.start.getTime())
                     );
                 }) as CustomHoliday[];
