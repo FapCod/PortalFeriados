@@ -165,9 +165,16 @@ class HolidayService {
             rule: String(h.rule || '')
           };
         } else {
-          // Handle single object result
-          // Cast to any to avoid TypeScript inference issues with the library types
-          const h = result as any;
+          // Handle single object result sin usar 'any'
+          const h = result as unknown as {
+            date?: string;
+            start: string | number | Date;
+            end: string | number | Date;
+            name?: string;
+            type?: string;
+            rule?: string;
+          };
+
           return {
             date: String(h.date || ''),
             start: new Date(h.start),

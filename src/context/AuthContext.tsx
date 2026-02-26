@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Login function
     const login = useCallback(async (credentials: LoginCredentials) => {
-        const result = authService.login(credentials);
+        const result = await authService.login(credentials);
 
         if (result.success && result.session) {
             setSession(result.session);

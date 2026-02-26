@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { useHolidayContext } from '../../context/HolidayContext';
-import { holidayService } from '../../services/holidayService';
-import type { Holiday } from '../../services/holidayService';
-import type { CustomHoliday } from '../../services/customHolidayService';
+import { useHolidayStore } from '../../../../store/useHolidayStore';
+import { holidayService } from '../../../../services/holidayService';
+import type { Holiday } from '../../../../services/holidayService';
+import type { CustomHoliday } from '../../../../services/customHolidayService';
 import { HolidayCard } from './HolidayCard';
 import { AlertCircle, PartyPopper } from 'lucide-react';
 import './HolidayList.css';
@@ -12,7 +12,7 @@ import './HolidayList.css';
  * Groups holidays by month and merges custom holidays with official ones
  */
 export const HolidayList: React.FC = () => {
-    const { selectedCountry, selectedYear, filterType, customHolidays } = useHolidayContext();
+    const { selectedCountry, selectedYear, filterType, customHolidays } = useHolidayStore();
 
     // Merge official and custom holidays
     const holidays = useMemo(() => {
@@ -23,8 +23,8 @@ export const HolidayList: React.FC = () => {
 
         // Merge and sort by date
         const allHolidays: Array<{ holiday: Holiday | CustomHoliday; isCustom: boolean }> = [
-            ...filteredOfficial.map(h => ({ holiday: h, isCustom: false })),
-            ...customHolidays.map(h => ({ holiday: h, isCustom: true })),
+            ...filteredOfficial.map((h: Holiday) => ({ holiday: h, isCustom: false })),
+            ...customHolidays.map((h: CustomHoliday) => ({ holiday: h, isCustom: true })),
         ];
 
         return allHolidays.sort((a, b) =>

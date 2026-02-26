@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import { useHolidayContext } from '../../context/HolidayContext';
-import { holidayService } from '../../services/holidayService';
-import type { Holiday } from '../../services/holidayService';
-import { holidayTypeService } from '../../services/holidayTypeService';
+import { useHolidayStore } from '../../../../store/useHolidayStore';
+import { holidayService } from '../../../../services/holidayService';
+import type { Holiday } from '../../../../services/holidayService';
+import type { CustomHoliday } from '../../../../services/customHolidayService';
+import { holidayTypeService } from '../../../../services/holidayTypeService';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, getDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AlertCircle } from 'lucide-react';
@@ -12,7 +13,7 @@ import './HolidayCalendar.css';
  * Calendar view component for displaying holidays
  */
 export const HolidayCalendar: React.FC = () => {
-    const { selectedCountry, selectedYear, filterType, customHolidays } = useHolidayContext();
+    const { selectedCountry, selectedYear, filterType, customHolidays } = useHolidayStore();
 
     const holidays = useMemo(() => {
         if (!selectedCountry) return [];
@@ -23,16 +24,16 @@ export const HolidayCalendar: React.FC = () => {
 
         // Get custom holidays for selected country/year
         const customForCountry = customHolidays.filter(
-            h => h.countryCode === selectedCountry.code && new Date(h.date).getFullYear() === selectedYear
+            (h: CustomHoliday) => h.countryCode === selectedCountry.code && new Date(h.date).getFullYear() === selectedYear
         );
 
         // Filter custom holidays by type
         const filteredCustom = filterType === 'all'
             ? customForCountry
-            : customForCountry.filter(h => h.type === filterType);
+            : customForCountry.filter((h: CustomHoliday) => h.type === filterType);
 
         // Convert custom holidays to Holiday format and merge
-        const customAsHolidays: Holiday[] = filteredCustom.map(ch => ({
+        const customAsHolidays: Holiday[] = filteredCustom.map((ch: CustomHoliday) => ({
             name: ch.name,
             type: ch.type,
             start: new Date(ch.date),

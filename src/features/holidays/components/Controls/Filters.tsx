@@ -1,7 +1,8 @@
 import React from 'react';
-import { useHolidayContext } from '../../context/HolidayContext';
-import { holidayService, HolidayType } from '../../services/holidayService';
-import { holidayTypeService } from '../../services/holidayTypeService';
+import { useHolidayStore } from '../../../../store/useHolidayStore';
+import { holidayService, HolidayType } from '../../../../services/holidayService';
+import type { Country } from '../../../../services/holidayService';
+import { holidayTypeService } from '../../../../services/holidayTypeService';
 import { Calendar as CalendarIcon, List, Filter } from 'lucide-react';
 import './Filters.css';
 
@@ -18,7 +19,7 @@ export const Filters: React.FC = () => {
         setSelectedYear,
         setViewMode,
         setFilterType,
-    } = useHolidayContext();
+    } = useHolidayStore();
 
     const countries = holidayService.getSupportedCountries();
     const currentYear = new Date().getFullYear();
@@ -26,7 +27,7 @@ export const Filters: React.FC = () => {
 
     const holidayTypes = [
         { value: HolidayType.ALL, label: 'Todos' },
-        ...holidayTypeService.getAllTypes().map(t => ({
+        ...holidayTypeService.getAllTypes().map((t: { id: string; name: string }) => ({
             value: t.id,
             label: t.name
         }))
@@ -50,12 +51,12 @@ export const Filters: React.FC = () => {
                         className="filter-select"
                         value={selectedCountry?.code || ''}
                         onChange={(e) => {
-                            const country = countries.find(c => c.code === e.target.value);
+                            const country = countries.find((c: Country) => c.code === e.target.value);
                             setSelectedCountry(country || null);
                         }}
                     >
                         <option value="">Selecciona un país</option>
-                        {countries.map((country) => (
+                        {countries.map((country: Country) => (
                             <option key={country.code} value={country.code}>
                                 {country.name}
                             </option>

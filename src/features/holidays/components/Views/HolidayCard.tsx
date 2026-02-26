@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import type { Holiday } from '../../services/holidayService';
-import type { CustomHoliday } from '../../services/customHolidayService';
+import type { Holiday } from '../../../../services/holidayService';
+import type { CustomHoliday } from '../../../../services/customHolidayService';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, Tag, Edit2, Trash2, Star } from 'lucide-react';
-import { useHolidayContext } from '../../context/HolidayContext';
-import { useAuth } from '../../context/AuthContext';
+import { useHolidayStore } from '../../../../store/useHolidayStore';
+import { useAuth } from '../../../../context/AuthContext';
 import { AddHolidayForm } from '../Controls/AddHolidayForm';
-import { holidayTypeService } from '../../services/holidayTypeService';
+import { holidayTypeService } from '../../../../services/holidayTypeService';
 import './HolidayCard.css';
 
 interface HolidayCardProps {
@@ -16,7 +16,7 @@ interface HolidayCardProps {
 }
 
 export const HolidayCard: React.FC<HolidayCardProps> = ({ holiday, isCustom = false }) => {
-    const { deleteCustomHoliday } = useHolidayContext();
+    const { deleteCustomHoliday } = useHolidayStore();
     const { isAdmin } = useAuth();
     const [showEditForm, setShowEditForm] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);

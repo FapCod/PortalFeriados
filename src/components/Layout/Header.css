@@ -130,6 +130,29 @@
     transform: translateY(0);
 }
 
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.mobile-menu-toggle:hover {
+    background-color: var(--button-hover);
+}
+
+.mobile-menu-close {
+    display: none;
+}
+
+.mobile-only-text {
+    display: none;
+}
+
 @keyframes float {
 
     0%,
@@ -145,38 +168,99 @@
 @media (max-width: 768px) {
     .header-content {
         padding: 0 1rem;
-        flex-direction: row;
-        gap: 0.5rem;
+    }
+
+    .mobile-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mobile-menu-close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: var(--text-color);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: var(--radius-md);
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        transition: background-color var(--transition-fast);
+    }
+
+    .mobile-menu-close:hover {
+        background-color: var(--button-hover);
+    }
+
+    .header-nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: 100vh;
+        background-color: var(--bg-card);
+        box-shadow: -4px 0 24px var(--shadow-color);
+        padding: 5rem 1.5rem 2rem;
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 99;
+        overflow-y: auto;
+    }
+
+    .header-nav.mobile-open {
+        right: 0;
     }
 
     .header-auth {
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-
-    .header-title {
-        font-size: 1.25rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
     }
 
     .header-user {
-        padding: 6px 12px;
+        justify-content: flex-start;
+        padding: 12px;
     }
 
     .header-username {
-        display: none;
+        display: inline;
     }
 
     .header-add-btn span,
     .header-types-btn span,
     .header-login-btn span,
-    .header-logout-btn span {
-        display: none;
+    .header-logout-btn span,
+    .mobile-only-text {
+        display: inline;
     }
 
     .header-add-btn,
     .header-types-btn,
     .header-login-btn,
-    .header-logout-btn {
-        padding: 10px;
+    .header-logout-btn,
+    .header-theme-btn {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 12px;
+    }
+
+    .mobile-menu-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
+        z-index: 98;
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    .header-title {
+        font-size: 1.25rem;
     }
 }

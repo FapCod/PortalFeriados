@@ -1,21 +1,27 @@
-import { HolidayProvider, useHolidayContext } from './context/HolidayContext';
+import React, { Suspense } from 'react';
+import { HolidayProvider } from './context/HolidayContext';
+import { useHolidayStore } from './store/useHolidayStore';
 import { AuthProvider } from './context/AuthContext';
 import { Layout } from './components/Layout/Layout';
-import { Filters } from './components/Controls/Filters';
-import { HolidayList } from './components/Views/HolidayList';
-import { HolidayCalendar } from './components/Views/HolidayCalendar';
+import { Filters } from './features/holidays/components/Controls/Filters';
 import './App.css';
+
+// Lazy load view components
+const HolidayList = React.lazy(() => import('./features/holidays/components/Views/HolidayList').then(module => ({ default: module.HolidayList })));
+const HolidayCalendar = React.lazy(() => import('./features/holidays/components/Views/HolidayCalendar').then(module => ({ default: module.HolidayCalendar })));
 
 /**
  * Main application component wrapper
  */
 function AppContent() {
-  const { viewMode } = useHolidayContext();
+  const { viewMode } = useHolidayStore();
 
   return (
     <Layout>
       <Filters />
-      {viewMode === 'list' ? <HolidayList /> : <HolidayCalendar />}
+      <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Cargando vista...</div>}>
+        {viewMode === 'list' ? <HolidayList /> : <HolidayCalendar />}
+      </Suspense>
     </Layout>
   );
 }

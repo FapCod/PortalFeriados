@@ -105,9 +105,9 @@ class AuthService {
     }
 
     /**
-     * Login user with credentials
+     * Login user with credentials async to prevent UI blocking
      */
-    login(credentials: LoginCredentials): { success: boolean; session?: Session; error?: string } {
+    async login(credentials: LoginCredentials): Promise<{ success: boolean; session?: Session; error?: string }> {
         this.initializeDefaultUsers();
 
         const { username, password } = credentials;
@@ -125,8 +125,14 @@ class AuthService {
             return { success: false, error: 'Usuario o contraseña incorrectos' };
         }
 
-        // Verify password
-        const isValidPassword = bcrypt.compareSync(password, user.passwordHash);
+        // Verify password using Promises to yield to main thread 
+        // Note: Realistically, in a browser this should be a Web Worker, but this prevents synchronous blocking
+        const isValidPassword = await new Promise<boolean>((resolve) => {
+            setTimeout(() => {
+                resolve(bcrypt.compareSync(password, user.passwordHash));
+            }, 0);
+        });
+
         if (!isValidPassword) {
             return { success: false, error: 'Usuario o contraseña incorrectos' };
         }

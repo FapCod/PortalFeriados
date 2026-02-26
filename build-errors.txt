@@ -1,0 +1,38 @@
+
+> portalferiados@0.0.0 build
+> tsc -b && vite build
+
+src/components/Layout/Header.tsx(5,32): error TS2307: Cannot find module '../Controls/AddHolidayForm' or its corresponding type declarations.
+src/features/holidays/components/Controls/AddHolidayButton.tsx(3,25): error TS2307: Cannot find module '../../context/AuthContext' or its corresponding type declarations.
+src/features/holidays/components/Controls/AddHolidayForm.tsx(2,35): error TS2307: Cannot find module '../../context/HolidayContext' or its corresponding type declarations.
+src/features/holidays/components/Controls/AddHolidayForm.tsx(3,32): error TS2307: Cannot find module '../../../services/holidayService' or its corresponding type declarations.
+src/features/holidays/components/Controls/AddHolidayForm.tsx(4,36): error TS2307: Cannot find module '../../services/holidayTypeService' or its corresponding type declarations.
+src/features/holidays/components/Controls/AddHolidayForm.tsx(5,44): error TS2307: Cannot find module '../../services/customHolidayService' or its corresponding type declarations.
+src/features/holidays/components/Controls/AddHolidayForm.tsx(43,63): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/features/holidays/components/Controls/AddHolidayForm.tsx(79,21): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+src/features/holidays/components/Controls/AddHolidayForm.tsx(156,45): error TS7006: Parameter 'country' implicitly has an 'any' type.
+src/features/holidays/components/Controls/AddHolidayForm.tsx(192,48): error TS7006: Parameter 'type' implicitly has an 'any' type.
+src/features/holidays/components/Controls/Filters.tsx(2,33): error TS2307: Cannot find module '../../../store/useHolidayStore' or its corresponding type declarations.
+src/features/holidays/components/Controls/Filters.tsx(3,45): error TS2307: Cannot find module '../../../services/holidayService' or its corresponding type declarations.
+src/features/holidays/components/Controls/Filters.tsx(4,36): error TS2307: Cannot find module '../../services/holidayTypeService' or its corresponding type declarations.
+src/features/holidays/components/Controls/Filters.tsx(29,49): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/features/holidays/components/Controls/Filters.tsx(53,60): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/features/holidays/components/Controls/Filters.tsx(58,41): error TS7006: Parameter 'country' implicitly has an 'any' type.
+src/features/holidays/components/Views/HolidayCalendar.tsx(2,33): error TS2307: Cannot find module '../../../store/useHolidayStore' or its corresponding type declarations.
+src/features/holidays/components/Views/HolidayCalendar.tsx(3,32): error TS2307: Cannot find module '../../../services/holidayService' or its corresponding type declarations.
+src/features/holidays/components/Views/HolidayCalendar.tsx(4,30): error TS2307: Cannot find module '../../services/holidayService' or its corresponding type declarations.
+src/features/holidays/components/Views/HolidayCalendar.tsx(5,36): error TS2307: Cannot find module '../../services/holidayTypeService' or its corresponding type declarations.
+src/features/holidays/components/Views/HolidayCalendar.tsx(26,13): error TS7006: Parameter 'h' implicitly has an 'any' type.
+src/features/holidays/components/Views/HolidayCalendar.tsx(32,39): error TS7006: Parameter 'h' implicitly has an 'any' type.
+src/features/holidays/components/Views/HolidayCalendar.tsx(35,64): error TS7006: Parameter 'ch' implicitly has an 'any' type.
+src/features/holidays/components/Views/HolidayCard.tsx(2,30): error TS2307: Cannot find module '../../../services/holidayService' or its corresponding type declarations.
+src/features/holidays/components/Views/HolidayCard.tsx(3,36): error TS2307: Cannot find module '../../services/customHolidayService' or its corresponding type declarations.
+src/features/holidays/components/Views/HolidayCard.tsx(7,35): error TS2307: Cannot find module '../../context/HolidayContext' or its corresponding type declarations.
+src/features/holidays/components/Views/HolidayCard.tsx(8,25): error TS2307: Cannot find module '../../context/AuthContext' or its corresponding type declarations.
+src/features/holidays/components/Views/HolidayCard.tsx(10,36): error TS2307: Cannot find module '../../services/holidayTypeService' or its corresponding type declarations.
+src/features/holidays/components/Views/HolidayList.tsx(2,33): error TS2307: Cannot find module '../../../store/useHolidayStore' or its corresponding type declarations.
+src/features/holidays/components/Views/HolidayList.tsx(3,32): error TS2307: Cannot find module '../../../services/holidayService' or its corresponding type declarations.
+src/features/holidays/components/Views/HolidayList.tsx(4,30): error TS2307: Cannot find module '../../services/holidayService' or its corresponding type declarations.
+src/features/holidays/components/Views/HolidayList.tsx(5,36): error TS2307: Cannot find module '../../services/customHolidayService' or its corresponding type declarations.
+src/features/holidays/components/Views/HolidayList.tsx(26,37): error TS7006: Parameter 'h' implicitly has an 'any' type.
+src/features/holidays/components/Views/HolidayList.tsx(27,35): error TS7006: Parameter 'h' implicitly has an 'any' type.

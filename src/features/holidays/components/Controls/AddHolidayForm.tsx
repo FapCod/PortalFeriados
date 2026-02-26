@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { useHolidayContext } from '../../context/HolidayContext';
-import { holidayService } from '../../services/holidayService';
-import { holidayTypeService } from '../../services/holidayTypeService';
-import type { CustomHolidayFormData } from '../../services/customHolidayService';
+import { useHolidayStore } from '../../../../store/useHolidayStore';
+import { holidayService } from '../../../../services/holidayService';
+import type { Country } from '../../../../services/holidayService';
+import { holidayTypeService } from '../../../../services/holidayTypeService';
+import type { HolidayTypeDefinition } from '../../../../services/holidayTypeService';
+import type { CustomHolidayFormData } from '../../../../services/customHolidayService';
 import { X, Calendar, Globe, MapPin, Tag, AlertCircle } from 'lucide-react';
 import './AddHolidayForm.css';
 
@@ -24,7 +26,7 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
     editHolidayId,
     initialData,
 }) => {
-    const { selectedCountry, addCustomHoliday, updateCustomHoliday } = useHolidayContext();
+    const { selectedCountry, addCustomHoliday, updateCustomHoliday } = useHolidayStore();
     const countries = holidayService.getSupportedCountries();
 
     const [formData, setFormData] = useState<CustomHolidayFormData>(
@@ -40,7 +42,7 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
     const [errors, setErrors] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const holidayTypes = holidayTypeService.getAllTypes().map(t => ({
+    const holidayTypes = holidayTypeService.getAllTypes().map((t: HolidayTypeDefinition) => ({
         value: t.id,
         label: t.name
     }));
@@ -76,7 +78,7 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
         field: keyof CustomHolidayFormData,
         value: string
     ) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData((prev: CustomHolidayFormData) => ({ ...prev, [field]: value }));
         setErrors([]); // Clear errors on input change
     };
 
@@ -153,7 +155,7 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
                             required
                         >
                             <option value="">Selecciona un país</option>
-                            {countries.map((country) => (
+                            {countries.map((country: Country) => (
                                 <option key={country.code} value={country.code}>
                                     {country.name}
                                 </option>
