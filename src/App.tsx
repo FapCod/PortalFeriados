@@ -14,7 +14,11 @@ const HolidayCalendar = React.lazy(() => import('./features/holidays/components/
  * Main application component wrapper
  */
 function AppContent() {
-  const { viewMode } = useHolidayStore();
+  const { viewMode, loadHolidayTypes } = useHolidayStore();
+
+  React.useEffect(() => {
+    loadHolidayTypes();
+  }, [loadHolidayTypes]);
 
   return (
     <Layout>

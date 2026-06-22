@@ -31,9 +31,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Load session on mount
     useEffect(() => {
-        const currentSession = authService.getSession();
-        setSession(currentSession);
-        setLoading(false);
+        const loadSession = async () => {
+            const currentSession = await authService.getSession();
+            setSession(currentSession);
+            setLoading(false);
+        };
+        loadSession();
     }, []);
 
     // Login function
@@ -49,8 +52,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }, []);
 
     // Logout function
-    const logout = useCallback(() => {
-        authService.logout();
+    const logout = useCallback(async () => {
+        await authService.logout();
         setSession(null);
     }, []);
 

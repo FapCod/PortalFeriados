@@ -22,7 +22,7 @@ USING (auth.uid() = id);
 -- Políticas para holiday_types
 -- Guest: Solo lectura. Admin: CRUD completo.
 -- -------------------------------------------------------------
-CREATE POLICY "Cualquiera puede ver tipos de feriados (Guest y Admin)" 
+CREATE POLICY "Cualquiera puede ver tipos de feriados" 
 ON holiday_types FOR SELECT 
 TO authenticated, anon 
 USING (true);
@@ -46,7 +46,7 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'administrat
 -- Políticas para custom_holidays
 -- Guest: Solo lectura. Admin: CRUD completo.
 -- -------------------------------------------------------------
-CREATE POLICY "Cualquiera puede ver feriados personalizados (Guest y Admin)" 
+CREATE POLICY "Cualquiera puede ver feriados personalizados" 
 ON custom_holidays FOR SELECT 
 TO authenticated, anon 
 USING (true);

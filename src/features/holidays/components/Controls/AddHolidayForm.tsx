@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useHolidayStore } from '../../../../store/useHolidayStore';
 import { holidayService } from '../../../../services/holidayService';
 import type { Country } from '../../../../services/holidayService';
-import { holidayTypeService } from '../../../../services/holidayTypeService';
-import type { HolidayTypeDefinition } from '../../../../services/holidayTypeService';
 import type { CustomHolidayFormData } from '../../../../services/customHolidayService';
 import { X, Calendar, Globe, MapPin, Tag, AlertCircle } from 'lucide-react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import './AddHolidayForm.css';
 
 interface AddHolidayFormProps {
@@ -26,8 +26,9 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
     editHolidayId,
     initialData,
 }) => {
-    const { selectedCountry, addCustomHoliday, updateCustomHoliday } = useHolidayStore();
+    const { selectedCountry, addCustomHoliday, updateCustomHoliday, holidayTypes: storeTypes } = useHolidayStore();
     const countries = holidayService.getSupportedCountries();
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const [formData, setFormData] = useState<CustomHolidayFormData>(
         initialData || {
@@ -42,19 +43,33 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
     const [errors, setErrors] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const holidayTypes = holidayTypeService.getAllTypes().map((t: HolidayTypeDefinition) => ({
+    // GSAP animations for modal entry
+    useGSAP(() => {
+        if (isOpen) {
+            gsap.fromTo('.modal-content',
+                { scale: 0.85, opacity: 0, y: 20 },
+                { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'back.out(1.5)' }
+            );
+            gsap.fromTo(containerRef.current,
+                { backgroundColor: 'rgba(0, 0, 0, 0)' },
+                { backgroundColor: 'rgba(0, 0, 0, 0.5)', duration: 0.3 }
+            );
+        }
+    }, { dependencies: [isOpen], scope: containerRef });
+
+    const holidayTypes = storeTypes.map((t) => ({
         value: t.id,
         label: t.name
     }));
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setErrors([]);
         setIsSubmitting(true);
 
         const result = editHolidayId
-            ? updateCustomHoliday(editHolidayId, formData)
-            : addCustomHoliday(formData);
+            ? await updateCustomHoliday(editHolidayId, formData)
+            : await addCustomHoliday(formData);
 
         setIsSubmitting(false);
 
@@ -85,7 +100,7 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-overlay" ref={containerRef} onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                     <h2 className="modal-title">

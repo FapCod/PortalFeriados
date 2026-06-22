@@ -7,9 +7,8 @@ CREATE TYPE user_role AS ENUM ('administrator', 'guest');
 
 -- Tabla de Usuarios (incluye preferencia de tema)
 CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     username VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
     role user_role NOT NULL DEFAULT 'guest',
     theme VARCHAR(10) DEFAULT 'light',
     created_at TIMESTAMPTZ DEFAULT NOW(),

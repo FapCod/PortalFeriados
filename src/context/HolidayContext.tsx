@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { HolidayType } from '../services/holidayService';
 import type { Country } from '../services/holidayService';
@@ -17,10 +17,10 @@ interface HolidayContextState {
     setSelectedYear: (year: number) => void;
     setViewMode: (mode: ViewMode) => void;
     setFilterType: (type: HolidayType) => void;
-    addCustomHoliday: (data: CustomHolidayFormData) => { success: boolean; errors?: string[] };
-    updateCustomHoliday: (id: string, data: CustomHolidayFormData) => { success: boolean; errors?: string[] };
-    deleteCustomHoliday: (id: string) => boolean;
-    refreshCustomHolidays: () => void;
+    addCustomHoliday: (data: CustomHolidayFormData) => Promise<{ success: boolean; errors?: string[] }>;
+    updateCustomHoliday: (id: string, data: CustomHolidayFormData) => Promise<{ success: boolean; errors?: string[] }>;
+    deleteCustomHoliday: (id: string) => Promise<boolean>;
+    refreshCustomHolidays: () => Promise<void>;
 }
 
 const HolidayContext = createContext<HolidayContextState | undefined>(undefined);
@@ -38,30 +38,29 @@ export const HolidayProvider: React.FC<HolidayProviderProps> = ({ children }) =>
     const [filterType, setFilterType] = useState<HolidayType>(HolidayType.ALL);
     const [customHolidays, setCustomHolidays] = useState<CustomHoliday[]>([]);
 
+    const refreshCustomHolidays = useCallback(async () => {
+        const holidays = await customHolidayService.getCustomHolidays(selectedCountry?.code, selectedYear);
+        setCustomHolidays(holidays);
+    }, [selectedCountry, selectedYear]);
+
     useEffect(() => {
-        const holidays = customHolidayService.getCustomHolidays(selectedCountry?.code, selectedYear);
-        setCustomHolidays(holidays);
-    }, [selectedCountry, selectedYear]);
+        refreshCustomHolidays();
+    }, [selectedCountry, selectedYear, refreshCustomHolidays]);
 
-    const refreshCustomHolidays = useCallback(() => {
-        const holidays = customHolidayService.getCustomHolidays(selectedCountry?.code, selectedYear);
-        setCustomHolidays(holidays);
-    }, [selectedCountry, selectedYear]);
-
-    const addCustomHoliday = useCallback((data: CustomHolidayFormData) => {
-        const result = customHolidayService.addCustomHoliday(data);
+    const addCustomHoliday = useCallback(async (data: CustomHolidayFormData) => {
+        const result = await customHolidayService.addCustomHoliday(data);
         if (result.success) refreshCustomHolidays();
         return result;
     }, [refreshCustomHolidays]);
 
-    const updateCustomHoliday = useCallback((id: string, data: CustomHolidayFormData) => {
-        const result = customHolidayService.updateCustomHoliday(id, data);
+    const updateCustomHoliday = useCallback(async (id: string, data: CustomHolidayFormData) => {
+        const result = await customHolidayService.updateCustomHoliday(id, data);
         if (result.success) refreshCustomHolidays();
         return result;
     }, [refreshCustomHolidays]);
 
-    const deleteCustomHoliday = useCallback((id: string) => {
-        const success = customHolidayService.deleteCustomHoliday(id);
+    const deleteCustomHoliday = useCallback(async (id: string) => {
+        const success = await customHolidayService.deleteCustomHoliday(id);
         if (success) refreshCustomHolidays();
         return success;
     }, [refreshCustomHolidays]);

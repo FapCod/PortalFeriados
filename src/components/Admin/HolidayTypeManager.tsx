@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Plus, Trash2, Edit2, Save, RotateCcw } from 'lucide-react';
 import { holidayTypeService } from '../../services/holidayTypeService';
 import type { HolidayTypeDefinition } from '../../services/holidayTypeService';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import './HolidayTypeManager.css';
 
 interface HolidayTypeManagerProps {
@@ -17,9 +19,25 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
     const [editName, setEditName] = useState('');
     const [editColor, setEditColor] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    const loadTypes = () => {
-        setTypes(holidayTypeService.getAllTypes());
+    // GSAP animations for modal entry
+    useGSAP(() => {
+        if (isOpen) {
+            gsap.fromTo('.holiday-type-modal',
+                { scale: 0.85, opacity: 0, y: 20 },
+                { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'back.out(1.5)' }
+            );
+            gsap.fromTo(containerRef.current,
+                { backgroundColor: 'rgba(0, 0, 0, 0)' },
+                { backgroundColor: 'rgba(0, 0, 0, 0.5)', duration: 0.3 }
+            );
+        }
+    }, { dependencies: [isOpen], scope: containerRef });
+
+    const loadTypes = async () => {
+        const data = await holidayTypeService.getAllTypes();
+        setTypes(data);
     };
 
     useEffect(() => {
@@ -28,24 +46,24 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
         }
     }, [isOpen]);
 
-    const handleAddType = (e: React.FormEvent) => {
+    const handleAddType = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         try {
-            holidayTypeService.addType(newTypeName, newTypeColor);
+            await holidayTypeService.addType(newTypeName, newTypeColor);
             setNewTypeName('');
             setNewTypeColor('#10B981');
-            loadTypes();
+            await loadTypes();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al agregar tipo');
         }
     };
 
-    const handleDeleteType = (id: string) => {
+    const handleDeleteType = async (id: string) => {
         if (window.confirm('¿Estás seguro de eliminar este tipo de feriado?')) {
             try {
-                holidayTypeService.deleteType(id);
-                loadTypes();
+                await holidayTypeService.deleteType(id);
+                await loadTypes();
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Error al eliminar tipo');
             }
@@ -65,11 +83,11 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
         setError(null);
     };
 
-    const handleUpdateType = (id: string) => {
+    const handleUpdateType = async (id: string) => {
         try {
-            holidayTypeService.updateType(id, editName, editColor);
+            await holidayTypeService.updateType(id, editName, editColor);
             setEditingId(null);
-            loadTypes();
+            await loadTypes();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al actualizar tipo');
         }
@@ -78,7 +96,7 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
     if (!isOpen) return null;
 
     return (
-        <div className="holiday-type-overlay">
+        <div className="holiday-type-overlay" ref={containerRef}>
             <div className="holiday-type-modal">
                 <div className="holiday-type-header">
                     <h2 className="holiday-type-title">Gestionar Tipos de Feriado</h2>
@@ -98,6 +116,7 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
                                 onChange={(e) => setNewTypeName(e.target.value)}
                                 placeholder="Nombre del nuevo tipo"
                                 className="form-input"
+                                required
                             />
                         </div>
                         <div className="form-group">
@@ -125,6 +144,7 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
                                             value={editName}
                                             onChange={(e) => setEditName(e.target.value)}
                                             className="edit-input"
+                                            required
                                         />
                                         <input
                                             type="color"

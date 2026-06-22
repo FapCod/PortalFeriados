@@ -5,7 +5,12 @@ import { useTheme } from '../../context/ThemeContext';
 import { AddHolidayForm } from '../../features/holidays/components/Controls/AddHolidayForm';
 import { HolidayTypeManager } from '../Admin/HolidayTypeManager';
 import { LoginForm } from '../Auth/LoginForm';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import './Header.css';
+
+// Register GSAP React plugin
+gsap.registerPlugin(useGSAP);
 
 export const Header = () => {
     const { session, logout, isAdmin } = useAuth();
@@ -15,6 +20,21 @@ export const Header = () => {
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Animate mobile menu entry using GSAP
+    useGSAP(() => {
+        if (isMobileMenuOpen) {
+            gsap.fromTo('.header-nav.mobile-open',
+                { x: '100%', opacity: 0 },
+                { x: '0%', opacity: 1, duration: 0.3, ease: 'power3.out' }
+            );
+            gsap.fromTo('.mobile-menu-overlay',
+                { opacity: 0 },
+                { opacity: 1, duration: 0.3 }
+            );
+        }
+    }, { dependencies: [isMobileMenuOpen], scope: containerRef });
 
     // Close mobile menu when clicking outside
     useEffect(() => {
@@ -33,7 +53,7 @@ export const Header = () => {
     const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
     return (
-        <header className="header">
+        <header className="header" ref={containerRef}>
             <div className="header-content">
                 <div className="header-brand">
                     <Calendar className="header-icon" size={32} />
@@ -114,17 +134,7 @@ export const Header = () => {
             {isMobileMenuOpen && <div className="mobile-menu-overlay" onClick={closeMobileMenu} />}
 
             {isAddFormOpen && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <button
-                            className="modal-close"
-                            onClick={() => setIsAddFormOpen(false)}
-                        >
-                            <CloseIcon size={24} />
-                        </button>
-                        <AddHolidayForm onSuccess={() => setIsAddFormOpen(false)} isOpen={isAddFormOpen} onClose={() => setIsAddFormOpen(false)} />
-                    </div>
-                </div>
+                <AddHolidayForm onSuccess={() => setIsAddFormOpen(false)} isOpen={isAddFormOpen} onClose={() => setIsAddFormOpen(false)} />
             )}
 
             <HolidayTypeManager

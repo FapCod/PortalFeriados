@@ -2,7 +2,6 @@ import React from 'react';
 import { useHolidayStore } from '../../../../store/useHolidayStore';
 import { holidayService, HolidayType } from '../../../../services/holidayService';
 import type { Country } from '../../../../services/holidayService';
-import { holidayTypeService } from '../../../../services/holidayTypeService';
 import { Calendar as CalendarIcon, List, Filter } from 'lucide-react';
 import './Filters.css';
 
@@ -19,6 +18,7 @@ export const Filters: React.FC = () => {
         setSelectedYear,
         setViewMode,
         setFilterType,
+        holidayTypes: storeTypes,
     } = useHolidayStore();
 
     const countries = holidayService.getSupportedCountries();
@@ -27,7 +27,7 @@ export const Filters: React.FC = () => {
 
     const holidayTypes = [
         { value: HolidayType.ALL, label: 'Todos' },
-        ...holidayTypeService.getAllTypes().map((t: { id: string; name: string }) => ({
+        ...storeTypes.map((t: { id: string; name: string }) => ({
             value: t.id,
             label: t.name
         }))

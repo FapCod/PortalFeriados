@@ -1,10 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { useHolidayStore } from '../../../../store/useHolidayStore';
 import { holidayService } from '../../../../services/holidayService';
 import type { Holiday } from '../../../../services/holidayService';
 import type { CustomHoliday } from '../../../../services/customHolidayService';
 import { HolidayCard } from './HolidayCard';
 import { AlertCircle, PartyPopper } from 'lucide-react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import './HolidayList.css';
 
 /**
@@ -13,6 +15,7 @@ import './HolidayList.css';
  */
 export const HolidayList: React.FC = () => {
     const { selectedCountry, selectedYear, filterType, customHolidays } = useHolidayStore();
+    const containerRef = useRef<HTMLDivElement>(null);
 
     // Merge official and custom holidays
     const holidays = useMemo(() => {
@@ -31,6 +34,16 @@ export const HolidayList: React.FC = () => {
             new Date(a.holiday.start).getTime() - new Date(b.holiday.start).getTime()
         );
     }, [selectedCountry, selectedYear, filterType, customHolidays]);
+
+    // Animate cards entering with a stagger effect
+    useGSAP(() => {
+        if (holidays.length > 0) {
+            gsap.fromTo('.holiday-card',
+                { opacity: 0, y: 30, scale: 0.95 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.05, ease: 'power2.out', clearProps: 'all' }
+            );
+        }
+    }, { dependencies: [holidays], scope: containerRef });
 
     const groupedHolidays = useMemo(() => {
         const groups: Record<string, typeof holidays> = {};
@@ -73,7 +86,7 @@ export const HolidayList: React.FC = () => {
     }
 
     return (
-        <div className="holiday-list">
+        <div className="holiday-list" ref={containerRef}>
             <div className="holiday-list-header">
                 <h2 className="holiday-list-title">
                     Feriados en {selectedCountry.name} - {selectedYear}

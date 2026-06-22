@@ -4,6 +4,8 @@ import { HolidayType } from '../services/holidayService';
 import type { Country } from '../services/holidayService';
 import { customHolidayService } from '../services/customHolidayService';
 import type { CustomHoliday, CustomHolidayFormData } from '../services/customHolidayService';
+import { holidayTypeService } from '../services/holidayTypeService';
+import type { HolidayTypeDefinition } from '../services/holidayTypeService';
 
 interface HolidayState {
     selectedCountry: Country | null;
@@ -11,18 +13,20 @@ interface HolidayState {
     viewMode: ViewMode;
     filterType: HolidayType;
     customHolidays: CustomHoliday[];
+    holidayTypes: HolidayTypeDefinition[];
 
     // Actions
     setSelectedCountry: (country: Country | null) => void;
     setSelectedYear: (year: number) => void;
     setViewMode: (mode: ViewMode) => void;
     setFilterType: (type: HolidayType) => void;
+    loadHolidayTypes: () => Promise<void>;
 
     // Custom Holiday Actions
-    refreshCustomHolidays: () => void;
-    addCustomHoliday: (data: CustomHolidayFormData) => { success: boolean; errors?: string[] };
-    updateCustomHoliday: (id: string, data: CustomHolidayFormData) => { success: boolean; errors?: string[] };
-    deleteCustomHoliday: (id: string) => boolean;
+    refreshCustomHolidays: () => Promise<void>;
+    addCustomHoliday: (data: CustomHolidayFormData) => Promise<{ success: boolean; errors?: string[] }>;
+    updateCustomHoliday: (id: string, data: CustomHolidayFormData) => Promise<{ success: boolean; errors?: string[] }>;
+    deleteCustomHoliday: (id: string) => Promise<boolean>;
 }
 
 const currentYear = new Date().getFullYear();
@@ -34,6 +38,7 @@ export const useHolidayStore = create<HolidayState>((set, get) => ({
     viewMode: 'list',
     filterType: HolidayType.ALL,
     customHolidays: [],
+    holidayTypes: [],
 
     // Selectors & Setters
     setSelectedCountry: (country) => {
@@ -49,28 +54,34 @@ export const useHolidayStore = create<HolidayState>((set, get) => ({
     setViewMode: (mode) => set({ viewMode: mode }),
     setFilterType: (type) => set({ filterType: type }),
 
-    // Thunks/Actions integration
-    refreshCustomHolidays: () => {
+    // Fetch Holiday Types from Supabase
+    loadHolidayTypes: async () => {
+        const types = await holidayTypeService.getAllTypes();
+        set({ holidayTypes: types });
+    },
+
+    // Thunks/Actions integration with Supabase
+    refreshCustomHolidays: async () => {
         const state = get();
-        const holidays = customHolidayService.getCustomHolidays(state.selectedCountry?.code, state.selectedYear);
+        const holidays = await customHolidayService.getCustomHolidays(state.selectedCountry?.code, state.selectedYear);
         set({ customHolidays: holidays });
     },
 
-    addCustomHoliday: (data) => {
-        const result = customHolidayService.addCustomHoliday(data);
-        if (result.success) get().refreshCustomHolidays();
+    addCustomHoliday: async (data) => {
+        const result = await customHolidayService.addCustomHoliday(data);
+        if (result.success) await get().refreshCustomHolidays();
         return result;
     },
 
-    updateCustomHoliday: (id, data) => {
-        const result = customHolidayService.updateCustomHoliday(id, data);
-        if (result.success) get().refreshCustomHolidays();
+    updateCustomHoliday: async (id, data) => {
+        const result = await customHolidayService.updateCustomHoliday(id, data);
+        if (result.success) await get().refreshCustomHolidays();
         return result;
     },
 
-    deleteCustomHoliday: (id) => {
-        const success = customHolidayService.deleteCustomHoliday(id);
-        if (success) get().refreshCustomHolidays();
+    deleteCustomHoliday: async (id) => {
+        const success = await customHolidayService.deleteCustomHoliday(id);
+        if (success) await get().refreshCustomHolidays();
         return success;
     }
 }));

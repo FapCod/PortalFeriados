@@ -30,9 +30,9 @@ export const HolidayCard: React.FC<HolidayCardProps> = ({ holiday, isCustom = fa
         return holidayTypeService.getColorForType(type);
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (isCustom && 'id' in holiday) {
-            deleteCustomHoliday(holiday.id);
+            await deleteCustomHoliday(holiday.id);
             setShowDeleteConfirm(false);
         }
     };

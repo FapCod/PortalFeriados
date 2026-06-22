@@ -1,3 +1,4 @@
+import { supabase } from './supabaseClient';
 import type { Holiday } from './holidayService';
 import { holidayTypeService } from './holidayTypeService';
 
@@ -28,10 +29,8 @@ export interface CustomHolidayFormData {
     type: string;
 }
 
-const STORAGE_KEY = 'portal_feriados_custom_holidays';
-
 /**
- * Service for managing custom holidays in localStorage
+ * Service for managing custom holidays in Supabase database
  * Implements input validation and XSS prevention
  */
 class CustomHolidayService {
@@ -49,19 +48,12 @@ class CustomHolidayService {
     }
 
     /**
-     * Generates a unique ID for custom holidays
-     */
-    private generateId(): string {
-        return `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    }
-
-    /**
      * Validates custom holiday data
      */
-    private validateHolidayData(data: CustomHolidayFormData): {
+    private async validateHolidayData(data: CustomHolidayFormData): Promise<{
         valid: boolean;
         errors: string[];
-    } {
+    }> {
         const errors: string[] = [];
 
         // Name validation
@@ -87,7 +79,7 @@ class CustomHolidayService {
         }
 
         // Type validation
-        const allTypes = holidayTypeService.getAllTypes();
+        const allTypes = await holidayTypeService.getAllTypes();
         const validTypes = allTypes.map(t => t.id);
 
         if (!data.type || !validTypes.includes(data.type)) {
@@ -106,229 +98,257 @@ class CustomHolidayService {
     }
 
     /**
-     * Loads custom holidays from localStorage
+     * Retrieves all custom holidays, filtered by country and year from Supabase
      */
-    private loadFromStorage(): CustomHoliday[] {
+    async getCustomHolidays(countryCode?: string, year?: number): Promise<CustomHoliday[]> {
         try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (!stored) return [];
+            let query = supabase
+                .from('custom_holidays')
+                .select('*, holiday_types(code)');
 
-            const parsed = JSON.parse(stored);
-            if (!Array.isArray(parsed)) return [];
+            if (countryCode) {
+                query = query.eq('country_code', countryCode.toUpperCase());
+            }
 
-            // Validate and reconstruct Date objects
-            return parsed
-                .map((holiday: unknown) => {
-                    const h = holiday as Record<string, unknown>;
-                    return {
-                        ...h,
-                        start: new Date(h.start as string),
-                        end: new Date(h.end as string),
-                        isCustom: true,
-                    };
-                })
-                .filter((h: unknown) => {
-                    const holiday = h as CustomHoliday;
-                    return (
-                        holiday.id &&
-                        holiday.name &&
-                        holiday.countryCode &&
-                        holiday.date &&
-                        !isNaN(holiday.start.getTime())
-                    );
-                }) as CustomHoliday[];
+            if (year !== undefined) {
+                // Query within date range for speed
+                query = query
+                    .gte('date', `${year}-01-01`)
+                    .lte('date', `${year}-12-31`);
+            }
+
+            const { data, error } = await query;
+
+            if (error) throw error;
+
+            const mapped = (data || []).map((row) => ({
+                id: row.id,
+                name: row.name,
+                date: row.date,
+                start: new Date(row.start_date),
+                end: new Date(row.end_date),
+                type: row.holiday_types?.code || 'public',
+                countryCode: row.country_code,
+                region: row.region || undefined,
+                rule: row.rule || 'custom',
+                isCustom: true as const,
+            }));
+
+            // Sort by start date ascending
+            return mapped.sort((a, b) => a.start.getTime() - b.start.getTime());
         } catch (error) {
-            console.error('Error loading custom holidays:', error);
+            console.error('Error loading custom holidays from Supabase:', error);
             return [];
         }
     }
 
     /**
-     * Saves custom holidays to localStorage
+     * Checks if a custom holiday already exists in the database
      */
-    private saveToStorage(holidays: CustomHoliday[]): void {
+    async isDuplicate(data: CustomHolidayFormData, excludeId?: string): Promise<boolean> {
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(holidays));
+            let query = supabase
+                .from('custom_holidays')
+                .select('id')
+                .eq('country_code', data.countryCode.toUpperCase())
+                .eq('date', data.date)
+                .ilike('name', data.name.trim());
+
+            if (excludeId) {
+                query = query.neq('id', excludeId);
+            }
+
+            const { data: matches, error } = await query;
+
+            if (error) throw error;
+            return (matches || []).length > 0;
         } catch (error) {
-            console.error('Error saving custom holidays:', error);
-            throw new Error(
-                'No se pudo guardar el feriado. Espacio de almacenamiento insuficiente.'
-            );
+            console.error('Error checking duplicate custom holidays:', error);
+            return false;
         }
     }
 
     /**
-     * Retrieves all custom holidays, optionally filtered by country and year
+     * Adds a new custom holiday to Supabase
      */
-    getCustomHolidays(countryCode?: string, year?: number): CustomHoliday[] {
-        let holidays = this.loadFromStorage();
-
-        if (countryCode) {
-            holidays = holidays.filter((h) => h.countryCode === countryCode);
-        }
-
-        if (year !== undefined) {
-            holidays = holidays.filter((h) => h.start.getFullYear() === year);
-        }
-
-        return holidays.sort((a, b) => a.start.getTime() - b.start.getTime());
-    }
-
-    /**
-     * Checks if a custom holiday already exists
-     */
-    isDuplicate(data: CustomHolidayFormData, excludeId?: string): boolean {
-        const holidays = this.loadFromStorage();
-        return holidays.some(
-            (h) =>
-                h.id !== excludeId &&
-                h.countryCode === data.countryCode &&
-                h.date === data.date &&
-                h.name.toLowerCase() === data.name.toLowerCase()
-        );
-    }
-
-    /**
-     * Adds a new custom holiday
-     */
-    addCustomHoliday(data: CustomHolidayFormData): {
+    async addCustomHoliday(data: CustomHolidayFormData): Promise<{
         success: boolean;
         holiday?: CustomHoliday;
         errors?: string[];
-    } {
-        // Validate input
-        const validation = this.validateHolidayData(data);
-        if (!validation.valid) {
-            return { success: false, errors: validation.errors };
-        }
+    }> {
+        try {
+            // Validate input
+            const validation = await this.validateHolidayData(data);
+            if (!validation.valid) {
+                return { success: false, errors: validation.errors };
+            }
 
-        // Check for duplicates
-        if (this.isDuplicate(data)) {
-            return {
-                success: false,
-                errors: [
-                    'Ya existe un feriado con el mismo nombre y fecha para este país',
-                ],
+            // Check for duplicates
+            const isDup = await this.isDuplicate(data);
+            if (isDup) {
+                return {
+                    success: false,
+                    errors: [
+                        'Ya existe un feriado con el mismo nombre y fecha para este país',
+                    ],
+                };
+            }
+
+            // Get type UUID from cache
+            const typeDef = holidayTypeService.getTypeById(data.type);
+            if (!typeDef || !typeDef.uuid) {
+                return { success: false, errors: ['Tipo de feriado inválido'] };
+            }
+
+            // Get current user session
+            const { data: { session } } = await supabase.auth.getSession();
+            const userId = session?.user?.id || null;
+
+            // Sanitize inputs
+            const sanitizedName = this.sanitizeInput(data.name);
+            const sanitizedRegion = data.region ? this.sanitizeInput(data.region) : null;
+
+            // Setup Dates (local timezone split)
+            const [year, month, day] = data.date.split('-').map(Number);
+            const start = new Date(year, month - 1, day);
+            const end = new Date(year, month - 1, day + 1);
+
+            const { data: inserted, error: insertError } = await supabase
+                .from('custom_holidays')
+                .insert([{
+                    name: sanitizedName,
+                    date: data.date,
+                    start_date: start.toISOString(),
+                    end_date: end.toISOString(),
+                    type_id: typeDef.uuid,
+                    country_code: data.countryCode.toUpperCase(),
+                    region: sanitizedRegion,
+                    rule: 'custom',
+                    is_custom: true,
+                    created_by: userId,
+                }])
+                .select('*, holiday_types(code)')
+                .single();
+
+            if (insertError) throw insertError;
+
+            const holiday: CustomHoliday = {
+                id: inserted.id,
+                name: inserted.name,
+                date: inserted.date,
+                start: new Date(inserted.start_date),
+                end: new Date(inserted.end_date),
+                type: inserted.holiday_types?.code || 'public',
+                countryCode: inserted.country_code,
+                region: inserted.region || undefined,
+                rule: inserted.rule || 'custom',
+                isCustom: true as const,
             };
+
+            return { success: true, holiday };
+        } catch (error) {
+            console.error('Error adding custom holiday to Supabase:', error);
+            return { success: false, errors: ['Error de red o base de datos al guardar el feriado'] };
         }
-
-        // Sanitize inputs
-        const sanitizedData = {
-            name: this.sanitizeInput(data.name),
-            countryCode: data.countryCode.toUpperCase(),
-            region: data.region ? this.sanitizeInput(data.region) : undefined,
-            type: data.type,
-            date: data.date,
-        };
-
-        // Create holiday object with local timezone
-        // Parse date as local timezone to avoid timezone conversion issues
-        const [year, month, day] = sanitizedData.date.split('-').map(Number);
-        const holidayDate = new Date(year, month - 1, day); // month is 0-indexed
-        const customHoliday: CustomHoliday = {
-            id: this.generateId(),
-            date: sanitizedData.date,
-            start: holidayDate,
-            end: new Date(year, month - 1, day + 1),
-            name: sanitizedData.name,
-            type: sanitizedData.type,
-            countryCode: sanitizedData.countryCode,
-            region: sanitizedData.region,
-            rule: 'custom',
-            isCustom: true,
-        };
-
-        // Save to storage
-        const holidays = this.loadFromStorage();
-        holidays.push(customHoliday);
-        this.saveToStorage(holidays);
-
-        return { success: true, holiday: customHoliday };
     }
 
     /**
-     * Updates an existing custom holiday
+     * Updates an existing custom holiday in Supabase
      */
-    updateCustomHoliday(
+    async updateCustomHoliday(
         id: string,
         data: CustomHolidayFormData
-    ): {
+    ): Promise<{
         success: boolean;
         holiday?: CustomHoliday;
         errors?: string[];
-    } {
-        // Validate input
-        const validation = this.validateHolidayData(data);
-        if (!validation.valid) {
-            return { success: false, errors: validation.errors };
-        }
+    }> {
+        try {
+            // Validate input
+            const validation = await this.validateHolidayData(data);
+            if (!validation.valid) {
+                return { success: false, errors: validation.errors };
+            }
 
-        // Check for duplicates (excluding current holiday)
-        if (this.isDuplicate(data, id)) {
-            return {
-                success: false,
-                errors: [
-                    'Ya existe un feriado con el mismo nombre y fecha para este país',
-                ],
+            // Check for duplicates (excluding current holiday)
+            const isDup = await this.isDuplicate(data, id);
+            if (isDup) {
+                return {
+                    success: false,
+                    errors: [
+                        'Ya existe un feriado con el mismo nombre y fecha para este país',
+                    ],
+                };
+            }
+
+            // Get type UUID from cache
+            const typeDef = holidayTypeService.getTypeById(data.type);
+            if (!typeDef || !typeDef.uuid) {
+                return { success: false, errors: ['Tipo de feriado inválido'] };
+            }
+
+            // Sanitize inputs
+            const sanitizedName = this.sanitizeInput(data.name);
+            const sanitizedRegion = data.region ? this.sanitizeInput(data.region) : null;
+
+            // Setup Dates
+            const [year, month, day] = data.date.split('-').map(Number);
+            const start = new Date(year, month - 1, day);
+            const end = new Date(year, month - 1, day + 1);
+
+            const { data: updated, error: updateError } = await supabase
+                .from('custom_holidays')
+                .update({
+                    name: sanitizedName,
+                    date: data.date,
+                    start_date: start.toISOString(),
+                    end_date: end.toISOString(),
+                    type_id: typeDef.uuid,
+                    country_code: data.countryCode.toUpperCase(),
+                    region: sanitizedRegion,
+                })
+                .eq('id', id)
+                .select('*, holiday_types(code)')
+                .single();
+
+            if (updateError) throw updateError;
+
+            const holiday: CustomHoliday = {
+                id: updated.id,
+                name: updated.name,
+                date: updated.date,
+                start: new Date(updated.start_date),
+                end: new Date(updated.end_date),
+                type: updated.holiday_types?.code || 'public',
+                countryCode: updated.country_code,
+                region: updated.region || undefined,
+                rule: updated.rule || 'custom',
+                isCustom: true as const,
             };
+
+            return { success: true, holiday };
+        } catch (error) {
+            console.error('Error updating custom holiday in Supabase:', error);
+            return { success: false, errors: ['Error de red o base de datos al actualizar el feriado'] };
         }
-
-        const holidays = this.loadFromStorage();
-        const index = holidays.findIndex((h) => h.id === id);
-
-        if (index === -1) {
-            return { success: false, errors: ['Feriado no encontrado'] };
-        }
-
-        // Sanitize inputs
-        const sanitizedData = {
-            name: this.sanitizeInput(data.name),
-            countryCode: data.countryCode.toUpperCase(),
-            region: data.region ? this.sanitizeInput(data.region) : undefined,
-            type: data.type,
-            date: data.date,
-        };
-
-        // Update holiday with local timezone
-        const [year, month, day] = sanitizedData.date.split('-').map(Number);
-        const holidayDate = new Date(year, month - 1, day);
-        const updatedHoliday: CustomHoliday = {
-            ...holidays[index],
-            date: sanitizedData.date,
-            start: holidayDate,
-            end: new Date(year, month - 1, day + 1),
-            name: sanitizedData.name,
-            type: sanitizedData.type,
-            countryCode: sanitizedData.countryCode,
-            region: sanitizedData.region,
-        };
-
-        holidays[index] = updatedHoliday;
-        this.saveToStorage(holidays);
-
-        return { success: true, holiday: updatedHoliday };
     }
 
     /**
-     * Deletes a custom holiday
+     * Deletes a custom holiday from Supabase
      */
-    deleteCustomHoliday(id: string): boolean {
-        const holidays = this.loadFromStorage();
-        const filtered = holidays.filter((h) => h.id !== id);
+    async deleteCustomHoliday(id: string): Promise<boolean> {
+        try {
+            const { error } = await supabase
+                .from('custom_holidays')
+                .delete()
+                .eq('id', id);
 
-        if (filtered.length === holidays.length) {
-            return false; // Holiday not found
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.error('Error deleting custom holiday from Supabase:', error);
+            return false;
         }
-
-        this.saveToStorage(filtered);
-        return true;
-    }
-
-    /**
-     * Clears all custom holidays (for testing/debugging)
-     */
-    clearAll(): void {
-        localStorage.removeItem(STORAGE_KEY);
     }
 }
 
