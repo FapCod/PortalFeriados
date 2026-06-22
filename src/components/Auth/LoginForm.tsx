@@ -23,13 +23,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, allowClose = true
     const containerRef = useRef<HTMLDivElement>(null);
 
     useGSAP(() => {
-        gsap.fromTo('.login-modal',
-            { scale: 0.85, opacity: 0, y: 20 },
-            { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'back.out(1.5)' }
-        );
-        gsap.fromTo(containerRef.current,
+        const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+        
+        tl.fromTo(containerRef.current,
             { backgroundColor: 'rgba(0, 0, 0, 0)' },
-            { backgroundColor: 'rgba(0, 0, 0, 0.5)', duration: 0.3 }
+            { backgroundColor: 'rgba(0, 0, 0, 0.5)', duration: 0.25 }
+        )
+        .fromTo('.login-modal',
+            { scale: 0.9, opacity: 0, y: 30 },
+            { scale: 1, opacity: 1, y: 0, duration: 0.45, ease: 'back.out(1.2)', clearProps: 'transform,opacity' },
+            '-=0.15'
         );
     }, { scope: containerRef });
 

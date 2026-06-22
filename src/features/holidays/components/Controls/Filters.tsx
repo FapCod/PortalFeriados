@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useHolidayStore } from '../../../../store/useHolidayStore';
 import { holidayService, HolidayType } from '../../../../services/holidayService';
 import type { Country } from '../../../../services/holidayService';
 import { Calendar as CalendarIcon, List, Filter } from 'lucide-react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import './Filters.css';
 
 /**
@@ -21,6 +23,15 @@ export const Filters: React.FC = () => {
         holidayTypes: storeTypes,
     } = useHolidayStore();
 
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useGSAP(() => {
+        gsap.fromTo(containerRef.current,
+            { opacity: 0, y: -25 },
+            { opacity: 1, y: 0, duration: 0.55, ease: 'power3.out', delay: 0.35, clearProps: 'all' }
+        );
+    }, { scope: containerRef });
+
     const countries = holidayService.getSupportedCountries();
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
@@ -34,7 +45,7 @@ export const Filters: React.FC = () => {
     ];
 
     return (
-        <div className="filters glass-panel">
+        <div className="filters glass-panel" ref={containerRef}>
             <div className="filters-header">
                 <Filter size={20} />
                 <h2 className="filters-title">Filtros</h2>

@@ -21,16 +21,19 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
     const [error, setError] = useState<string | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // GSAP animations for modal entry
+    // GSAP animations for modal entry using Timeline
     useGSAP(() => {
         if (isOpen) {
-            gsap.fromTo('.holiday-type-modal',
-                { scale: 0.85, opacity: 0, y: 20 },
-                { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'back.out(1.5)' }
-            );
-            gsap.fromTo(containerRef.current,
+            const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+            
+            tl.fromTo(containerRef.current,
                 { backgroundColor: 'rgba(0, 0, 0, 0)' },
-                { backgroundColor: 'rgba(0, 0, 0, 0.5)', duration: 0.3 }
+                { backgroundColor: 'rgba(0, 0, 0, 0.5)', duration: 0.25 }
+            )
+            .fromTo('.holiday-type-modal',
+                { scale: 0.9, opacity: 0, y: 30 },
+                { scale: 1, opacity: 1, y: 0, duration: 0.45, ease: 'back.out(1.2)', clearProps: 'transform,opacity' },
+                '-=0.15'
             );
         }
     }, { dependencies: [isOpen], scope: containerRef });

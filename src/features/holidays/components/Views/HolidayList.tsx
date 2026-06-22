@@ -35,13 +35,40 @@ export const HolidayList: React.FC = () => {
         );
     }, [selectedCountry, selectedYear, filterType, customHolidays]);
 
-    // Animate cards entering with a stagger effect
+    // Animate cards and month groups entering with ScrollTrigger
     useGSAP(() => {
         if (holidays.length > 0) {
-            gsap.fromTo('.holiday-card',
-                { opacity: 0, y: 30, scale: 0.95 },
-                { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.05, ease: 'power2.out', clearProps: 'all' }
-            );
+            const groups = containerRef.current?.querySelectorAll('.holiday-month-group');
+            if (groups && groups.length > 0) {
+                groups.forEach((group) => {
+                    const title = group.querySelector('.month-title');
+                    const cards = group.querySelectorAll('.holiday-card');
+                    
+                    const tl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: group,
+                            start: 'top 88%',
+                            toggleActions: 'play none none none',
+                            once: true
+                        }
+                    });
+                    
+                    if (title) {
+                        tl.fromTo(title,
+                            { opacity: 0, x: -20 },
+                            { opacity: 1, x: 0, duration: 0.45, ease: 'power2.out', clearProps: 'all' }
+                        );
+                    }
+                    
+                    if (cards.length > 0) {
+                        tl.fromTo(cards,
+                            { opacity: 0, y: 30, scale: 0.96 },
+                            { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.04, ease: 'power2.out', clearProps: 'all' },
+                            '-=0.25'
+                        );
+                    }
+                });
+            }
         }
     }, { dependencies: [holidays], scope: containerRef });
 

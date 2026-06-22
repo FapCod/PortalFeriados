@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { useHolidayStore } from '../../../../store/useHolidayStore';
 import { holidayService } from '../../../../services/holidayService';
 import type { Holiday } from '../../../../services/holidayService';
@@ -7,6 +7,9 @@ import { holidayTypeService } from '../../../../services/holidayTypeService';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, getDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AlertCircle } from 'lucide-react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './HolidayCalendar.css';
 
 /**
@@ -14,6 +17,7 @@ import './HolidayCalendar.css';
  */
 export const HolidayCalendar: React.FC = () => {
     const { selectedCountry, selectedYear, filterType, customHolidays } = useHolidayStore();
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const holidays = useMemo(() => {
         if (!selectedCountry) return [];
@@ -76,6 +80,31 @@ export const HolidayCalendar: React.FC = () => {
         return holidayTypeService.getColorForType(type);
     };
 
+    // Animate calendar months on scroll with ScrollTrigger.batch (UI/UX Pro Max)
+    useGSAP(() => {
+        if (selectedCountry) {
+            // Set initial state
+            gsap.set('.calendar-month', { opacity: 0, scale: 0.94, y: 25 });
+            
+            ScrollTrigger.batch('.calendar-month', {
+                start: 'top 88%',
+                once: true,
+                onEnter: (batch) => {
+                    gsap.to(batch, {
+                        opacity: 1,
+                        scale: 1,
+                        y: 0,
+                        duration: 0.5,
+                        stagger: 0.06,
+                        ease: 'power2.out',
+                        clearProps: 'transform,opacity',
+                        overwrite: 'auto'
+                    });
+                }
+            });
+        }
+    }, { dependencies: [selectedCountry, selectedYear, filterType], scope: containerRef });
+
     if (!selectedCountry) {
         return (
             <div className="calendar-empty">
@@ -89,7 +118,7 @@ export const HolidayCalendar: React.FC = () => {
     }
 
     return (
-        <div className="holiday-calendar">
+        <div className="holiday-calendar" ref={containerRef}>
             <div className="calendar-header">
                 <h2 className="calendar-title">
                     Calendario de Feriados - {selectedCountry.name} {selectedYear}

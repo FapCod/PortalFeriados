@@ -9,9 +9,6 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import './Header.css';
 
-// Register GSAP React plugin
-gsap.registerPlugin(useGSAP);
-
 export const Header = () => {
     const { session, logout, isAdmin } = useAuth();
     const { theme, toggleTheme } = useTheme();
@@ -21,6 +18,20 @@ export const Header = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // Animate header entry on load
+    useGSAP(() => {
+        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+        tl.fromTo('.header-brand',
+            { y: -35, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.6, clearProps: 'all' }
+        )
+        .fromTo('.header-auth > *',
+            { y: -25, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, clearProps: 'all' },
+            '-=0.35'
+        );
+    }, { scope: containerRef });
 
     // Animate mobile menu entry using GSAP
     useGSAP(() => {
@@ -35,6 +46,15 @@ export const Header = () => {
             );
         }
     }, { dependencies: [isMobileMenuOpen], scope: containerRef });
+
+    // Animate theme button icon on change (UI/UX Pro Max)
+    useGSAP(() => {
+        // Skip initial animation if possible, but in useGSAP we can animate it on theme change
+        gsap.fromTo('.header-theme-btn svg',
+            { rotation: -90, scale: 0.5, opacity: 0 },
+            { rotation: 0, scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.5)', clearProps: 'transform,opacity' }
+        );
+    }, { dependencies: [theme], scope: containerRef });
 
     // Close mobile menu when clicking outside
     useEffect(() => {

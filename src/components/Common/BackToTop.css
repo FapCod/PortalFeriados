@@ -1,0 +1,42 @@
+.back-to-top-btn {
+    position: fixed;
+    bottom: 2.5rem;
+    right: 2.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 99;
+    border: 1px solid var(--border-color);
+    background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
+    color: white !important;
+    box-shadow: var(--shadow-lg), 0 8px 24px -4px rgba(99, 102, 241, 0.3);
+    will-change: transform, opacity;
+    transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow 0.3s ease !important;
+}
+
+.back-to-top-btn:hover {
+    transform: scale(1.1) translateY(-4px) !important;
+    box-shadow: var(--shadow-lg), 0 12px 32px -4px rgba(236, 72, 153, 0.4);
+    background: linear-gradient(135deg, var(--accent), var(--secondary)) !important;
+}
+
+.back-to-top-btn:active {
+    transform: scale(0.95) translateY(0) !important;
+}
+
+.back-to-top-btn svg {
+    color: white !important;
+}
+
+@media (max-width: 768px) {
+    .back-to-top-btn {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 3rem;
+        height: 3rem;
+    }
+}
