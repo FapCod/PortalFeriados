@@ -4,7 +4,7 @@ import { useHolidayStore } from '../../../../store/useHolidayStore';
 import { holidayService } from '../../../../services/holidayService';
 import type { Country } from '../../../../services/holidayService';
 import type { CustomHolidayFormData } from '../../../../services/customHolidayService';
-import { X, Calendar, Globe, MapPin, Tag, AlertCircle } from 'lucide-react';
+import { X, Calendar, Globe, MapPin, Tag, AlertCircle, Check } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useToastStore } from '../../../../store/useToastStore';
@@ -44,6 +44,9 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
 
     const [errors, setErrors] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [addedHolidayName, setAddedHolidayName] = useState('');
+    const [isEditSuccess, setIsEditSuccess] = useState(false);
 
     // GSAP animations for modal entry using Timeline
     useGSAP(() => {
@@ -80,14 +83,19 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
         setIsSubmitting(false);
 
         if (result.success) {
+            const name = formData.name;
+            setAddedHolidayName(name);
+            setIsEditSuccess(!!editHolidayId);
+            setShowSuccessPopup(true);
+            
             addToast(
                 editHolidayId 
-                    ? '¡Feriado modificado con éxito!' 
-                    : '¡Feriado agregado con éxito!', 
+                    ? `¡Feriado "${name}" modificado con éxito!` 
+                    : `¡Feriado "${name}" creado con éxito!`, 
                 'success'
             );
-            onClose();
             if (onSuccess) onSuccess();
+            
             // Reset form
             setFormData({
                 name: '',
@@ -114,140 +122,167 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
     if (!isOpen) return null;
 
     return createPortal(
-        <div className="modal-overlay" ref={containerRef} onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
-                    <h2 className="modal-title">
-                        {editHolidayId ? 'Editar Feriado' : 'Agregar Feriado Personalizado'}
-                    </h2>
-                    <button className="modal-close" onClick={onClose} aria-label="Cerrar">
-                        <X size={24} />
-                    </button>
-                </div>
-
-                <form onSubmit={handleSubmit} className="holiday-form">
-                    {errors.length > 0 && (
-                        <div className="form-errors">
-                            <AlertCircle size={20} />
-                            <div>
-                                {errors.map((error, index) => (
-                                    <p key={index} className="error-message">
-                                        {error}
-                                    </p>
-                                ))}
-                            </div>
+        <>
+            {!showSuccessPopup ? (
+                <div className="modal-overlay" ref={containerRef} onClick={onClose}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2 className="modal-title">
+                                {editHolidayId ? 'Editar Feriado' : 'Agregar Feriado Personalizado'}
+                            </h2>
+                            <button className="modal-close" onClick={onClose} aria-label="Cerrar">
+                                <X size={24} />
+                            </button>
                         </div>
-                    )}
 
-                    <div className="form-group">
-                        <label htmlFor="name" className="form-label">
-                            <Tag size={16} />
-                            Nombre del Feriado *
-                        </label>
-                        <input
-                            type="text"
-                            id="name"
-                            className="form-input"
-                            value={formData.name}
-                            onChange={(e) => handleChange('name', e.target.value)}
-                            placeholder="ej. Día de la Independencia"
-                            maxLength={100}
-                            required
-                        />
-                    </div>
+                        <form onSubmit={handleSubmit} className="holiday-form">
+                            {errors.length > 0 && (
+                                <div className="form-errors">
+                                    <AlertCircle size={20} />
+                                    <div>
+                                        {errors.map((error, index) => (
+                                            <p key={index} className="error-message">
+                                                {error}
+                                            </p>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
-                    <div className="form-group">
-                        <label htmlFor="date" className="form-label">
-                            <Calendar size={16} />
-                            Fecha *
-                        </label>
-                        <input
-                            type="date"
-                            id="date"
-                            className="form-input"
-                            value={formData.date}
-                            onChange={(e) => handleChange('date', e.target.value)}
-                            required
-                        />
-                    </div>
+                            <div className="form-group">
+                                <label htmlFor="name" className="form-label">
+                                    <Tag size={16} />
+                                    Nombre del Feriado *
+                                </label>
+                                <input
+                                    type="text"
+                                    id="name"
+                                    className="form-input"
+                                    value={formData.name}
+                                    onChange={(e) => handleChange('name', e.target.value)}
+                                    placeholder="ej. Día de la Independencia"
+                                    maxLength={100}
+                                    required
+                                />
+                            </div>
 
-                    <div className="form-group">
-                        <label htmlFor="country" className="form-label">
-                            <Globe size={16} />
-                            País *
-                        </label>
-                        <select
-                            id="country"
-                            className="form-select"
-                            value={formData.countryCode}
-                            onChange={(e) => handleChange('countryCode', e.target.value)}
-                            required
-                        >
-                            <option value="">Selecciona un país</option>
-                            {countries.map((country: Country) => (
-                                <option key={country.code} value={country.code}>
-                                    {country.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                            <div className="form-group">
+                                <label htmlFor="date" className="form-label">
+                                    <Calendar size={16} />
+                                    Fecha *
+                                </label>
+                                <input
+                                    type="date"
+                                    id="date"
+                                    className="form-input"
+                                    value={formData.date}
+                                    onChange={(e) => handleChange('date', e.target.value)}
+                                    required
+                                />
+                            </div>
 
-                    <div className="form-group">
-                        <label htmlFor="region" className="form-label">
-                            <MapPin size={16} />
-                            Región o Provincia (opcional)
-                        </label>
-                        <input
-                            type="text"
-                            id="region"
-                            className="form-input"
-                            value={formData.region || ''}
-                            onChange={(e) => handleChange('region', e.target.value)}
-                            placeholder="ej. Ciudad de México"
-                            maxLength={100}
-                        />
-                    </div>
+                            <div className="form-group">
+                                <label htmlFor="country" className="form-label">
+                                    <Globe size={16} />
+                                    País *
+                                </label>
+                                <select
+                                    id="country"
+                                    className="form-select"
+                                    value={formData.countryCode}
+                                    onChange={(e) => handleChange('countryCode', e.target.value)}
+                                    required
+                                >
+                                    <option value="">Selecciona un país</option>
+                                    {countries.map((country: Country) => (
+                                        <option key={country.code} value={country.code}>
+                                            {country.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                    <div className="form-group">
-                        <label htmlFor="type" className="form-label">
-                            <Tag size={16} />
-                            Tipo de Feriado *
-                        </label>
-                        <select
-                            id="type"
-                            className="form-select"
-                            value={formData.type}
-                            onChange={(e) => handleChange('type', e.target.value)}
-                            required
-                        >
-                            {holidayTypes.map((type) => (
-                                <option key={type.value} value={type.value}>
-                                    {type.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                            <div className="form-group">
+                                <label htmlFor="region" className="form-label">
+                                    <MapPin size={16} />
+                                    Región o Provincia (opcional)
+                                </label>
+                                <input
+                                    type="text"
+                                    id="region"
+                                    className="form-input"
+                                    value={formData.region || ''}
+                                    onChange={(e) => handleChange('region', e.target.value)}
+                                    placeholder="ej. Ciudad de México"
+                                    maxLength={100}
+                                />
+                            </div>
 
-                    <div className="form-actions">
-                        <button
-                            type="button"
-                            className="btn btn-ghost"
-                            onClick={onClose}
-                            disabled={isSubmitting}
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? 'Guardando...' : editHolidayId ? 'Actualizar' : 'Agregar'}
-                        </button>
+                            <div className="form-group">
+                                <label htmlFor="type" className="form-label">
+                                    <Tag size={16} />
+                                    Tipo de Feriado *
+                                </label>
+                                <select
+                                    id="type"
+                                    className="form-select"
+                                    value={formData.type}
+                                    onChange={(e) => handleChange('type', e.target.value)}
+                                    required
+                                >
+                                    {holidayTypes.map((type) => (
+                                        <option key={type.value} value={type.value}>
+                                            {type.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="form-actions">
+                                <button
+                                    type="button"
+                                    className="btn btn-ghost"
+                                    onClick={onClose}
+                                    disabled={isSubmitting}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? 'Guardando...' : editHolidayId ? 'Actualizar' : 'Agregar'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
-            </div>
-        </div>,
+                </div>
+            ) : (
+                <div className="modal-overlay" style={{ zIndex: 1100 }} onClick={onClose}>
+                    <div className="confirm-dialog" style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '1rem', borderRadius: '50%', marginBottom: '1rem' }}>
+                            <Check size={36} />
+                        </div>
+                        <h3 className="confirm-title" style={{ marginTop: '0.5rem' }}>
+                            {isEditSuccess ? '¡Feriado modificado!' : '¡Feriado creado!'}
+                        </h3>
+                        <p className="confirm-message">
+                            El feriado "<strong>{addedHolidayName}</strong>" se ha {isEditSuccess ? 'actualizado' : 'creado'} con éxito y ya está disponible en la vista.
+                        </p>
+                        <div className="confirm-actions" style={{ justifyContent: 'center' }}>
+                            <button
+                                className="btn btn-primary"
+                                style={{ backgroundColor: '#10b981', color: 'white', padding: '0.5rem 2.5rem', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 500, cursor: 'pointer' }}
+                                onClick={onClose}
+                            >
+                                Aceptar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>,
         document.body
     );
 };

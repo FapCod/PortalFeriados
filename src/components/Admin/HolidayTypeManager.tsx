@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Plus, Trash2, Edit2, Save, RotateCcw } from 'lucide-react';
+import { X, Plus, Trash2, Edit2, Save, RotateCcw, Check } from 'lucide-react';
 import { holidayTypeService } from '../../services/holidayTypeService';
 import type { HolidayTypeDefinition } from '../../services/holidayTypeService';
 import { useHolidayStore } from '../../store/useHolidayStore';
@@ -25,6 +25,8 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
     const [editColor, setEditColor] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [typeToDelete, setTypeToDelete] = useState<{ id: string, name: string } | null>(null);
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [addedTypeName, setAddedTypeName] = useState('');
     const containerRef = useRef<HTMLDivElement>(null);
 
     // GSAP animations for modal entry using Timeline
@@ -51,6 +53,15 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
 
     useEffect(() => {
         if (isOpen) {
+            setError(null);
+            setNewTypeName('');
+            setNewTypeColor('#10B981');
+            setEditingId(null);
+            setEditName('');
+            setEditColor('');
+            setTypeToDelete(null);
+            setShowSuccessPopup(false);
+            setAddedTypeName('');
             loadTypes();
         }
     }, [isOpen]);
@@ -59,12 +70,15 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
         e.preventDefault();
         setError(null);
         try {
+            const addedName = newTypeName;
             await holidayTypeService.addType(newTypeName, newTypeColor);
             setNewTypeName('');
             setNewTypeColor('#10B981');
             await loadTypes();
             await loadHolidayTypes();
             addToast('¡Tipo de feriado agregado con éxito!', 'success');
+            setAddedTypeName(addedName);
+            setShowSuccessPopup(true);
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : 'Error al agregar tipo';
             setError(errorMsg);
@@ -74,10 +88,15 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
 
     const handleConfirmDelete = async () => {
         if (!typeToDelete) return;
+        const id = typeToDelete.id;
+        const name = typeToDelete.name;
+        
+        // Cerramos el modal de confirmación y limpiamos errores anteriores de inmediato
+        setTypeToDelete(null);
+        setError(null);
+        
         try {
-            await holidayTypeService.deleteType(typeToDelete.id);
-            const name = typeToDelete.name;
-            setTypeToDelete(null);
+            await holidayTypeService.deleteType(id);
             await loadTypes();
             await loadHolidayTypes();
             addToast(`¡Tipo de feriado "${name}" de baja con éxito!`, 'success');
@@ -229,6 +248,29 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
                                 onClick={handleConfirmDelete}
                             >
                                 Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showSuccessPopup && (
+                <div className="modal-overlay" style={{ zIndex: 1100 }} onClick={() => setShowSuccessPopup(false)}>
+                    <div className="confirm-dialog" style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '1rem', borderRadius: '50%', marginBottom: '1rem' }}>
+                            <Check size={36} />
+                        </div>
+                        <h3 className="confirm-title" style={{ marginTop: '0.5rem' }}>¡Tipo de feriado agregado!</h3>
+                        <p className="confirm-message">
+                            El tipo de feriado "<strong>{addedTypeName}</strong>" se ha creado con éxito y ya está disponible para su selección.
+                        </p>
+                        <div className="confirm-actions" style={{ justifyContent: 'center' }}>
+                            <button
+                                className="btn btn-primary"
+                                style={{ backgroundColor: '#10b981', color: 'white', padding: '0.5rem 2.5rem', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 500, cursor: 'pointer' }}
+                                onClick={() => setShowSuccessPopup(false)}
+                            >
+                                Aceptar
                             </button>
                         </div>
                     </div>
