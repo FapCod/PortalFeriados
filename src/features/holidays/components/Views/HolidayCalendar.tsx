@@ -50,7 +50,7 @@ export const HolidayCalendar: React.FC = () => {
     }, [selectedCountry, selectedYear, filterType, customHolidays]);
 
     const months = useMemo(() => {
-        return Array.from({ length: 12 }, (_, i) => {
+        const allMonths = Array.from({ length: 12 }, (_, i) => {
             const date = new Date(selectedYear, i, 1);
             return {
                 name: format(date, 'MMMM', { locale: es }),
@@ -61,7 +61,21 @@ export const HolidayCalendar: React.FC = () => {
                 }),
             };
         });
-    }, [selectedYear]);
+
+        // Si el filtro no es 'all', mostramos solo los meses que tienen feriados que coinciden con el filtro
+        if (filterType !== 'all') {
+            return allMonths.filter((month) => {
+                return holidays.some(holiday => {
+                    if (!holiday.date) return false;
+                    const dateParts = holiday.date.split(' ')[0]; // Obtiene la parte "YYYY-MM-DD"
+                    const [, m] = dateParts.split('-').map(Number);
+                    return m - 1 === month.date.getMonth();
+                });
+            });
+        }
+
+        return allMonths;
+    }, [selectedYear, filterType, holidays]);
 
     const getHolidaysForDay = (day: Date): Holiday[] => {
         const dayHolidays = holidays.filter(holiday => {
