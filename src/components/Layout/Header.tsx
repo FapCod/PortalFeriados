@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Calendar, User, LogOut, Plus, Settings, Sun, Moon, Menu, X as CloseIcon, Users } from 'lucide-react';
+import { Calendar, User, LogOut, Plus, Settings, Sun, Moon, Menu, X as CloseIcon, Users, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { AddHolidayForm } from '../../features/holidays/components/Controls/AddHolidayForm';
@@ -18,8 +18,10 @@ export const Header = () => {
     const [isPersonManagerOpen, setIsPersonManagerOpen] = useState(false);
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const userMenuRef = useRef<HTMLDivElement>(null);
 
     // Animate header entry on load
     useGSAP(() => {
@@ -61,16 +63,19 @@ export const Header = () => {
     // Close mobile menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node) && !userMenuRef.current?.contains(event.target as Node)) {
                 setIsMobileMenuOpen(false);
+            }
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+                setIsUserMenuOpen(false);
             }
         };
 
-        if (isMobileMenuOpen) {
+        if (isMobileMenuOpen || isUserMenuOpen) {
             document.addEventListener('mousedown', handleClickOutside);
         }
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isMobileMenuOpen]);
+    }, [isMobileMenuOpen, isUserMenuOpen]);
 
     const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
@@ -160,45 +165,58 @@ export const Header = () => {
 
                         {session ? (
                             <>
-                                <div className="header-user">
-                                    <User size={18} />
-                                    <span className="header-username">{session.username}</span>
-                                    <span className="header-role">{isAdmin ? 'Admin' : 'Invitado'}</span>
+                                <div className="user-menu-container" ref={userMenuRef}>
+                                    <button 
+                                        className="header-user-btn" 
+                                        onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                                    >
+                                        <User size={18} />
+                                        <span className="header-username">{session.username}</span>
+                                        <span className="header-role">{isAdmin ? 'Admin' : 'Invitado'}</span>
+                                        <ChevronDown size={16} className={`user-menu-chevron ${isUserMenuOpen ? 'open' : ''}`} />
+                                    </button>
+
+                                    {isUserMenuOpen && (
+                                        <div className="user-dropdown-menu">
+                                            {isAdmin && (
+                                                <>
+                                                    <button
+                                                        className="dropdown-item"
+                                                        onClick={() => { setIsTypeManagerOpen(true); setIsUserMenuOpen(false); closeMobileMenu(); }}
+                                                    >
+                                                        <Settings size={16} />
+                                                        <span>Tipos</span>
+                                                    </button>
+                                                    <button
+                                                        className="dropdown-item"
+                                                        onClick={() => { setIsAddFormOpen(true); setIsUserMenuOpen(false); closeMobileMenu(); }}
+                                                    >
+                                                        <Plus size={16} />
+                                                        <span>Agregar Feriado</span>
+                                                    </button>
+                                                </>
+                                            )}
+
+                                            <button
+                                                className="dropdown-item"
+                                                onClick={() => { setIsPersonManagerOpen(true); setIsUserMenuOpen(false); closeMobileMenu(); }}
+                                            >
+                                                <Users size={16} />
+                                                <span>Personas</span>
+                                            </button>
+
+                                            <div className="dropdown-divider"></div>
+
+                                            <button 
+                                                onClick={() => { logout(); setIsUserMenuOpen(false); closeMobileMenu(); }} 
+                                                className="dropdown-item text-danger"
+                                            >
+                                                <LogOut size={16} />
+                                                <span>Salir</span>
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
-
-                                {isAdmin && (
-                                    <>
-                                        <button
-                                            className="header-types-btn"
-                                            onClick={() => { setIsTypeManagerOpen(true); closeMobileMenu(); }}
-                                            title="Gestionar Tipos de Feriado"
-                                        >
-                                            <Settings size={18} />
-                                            <span>Tipos</span>
-                                        </button>
-                                        <button
-                                            className="header-add-btn"
-                                            onClick={() => { setIsAddFormOpen(true); closeMobileMenu(); }}
-                                        >
-                                            <Plus size={18} />
-                                            <span>Agregar Feriado</span>
-                                        </button>
-                                    </>
-                                )}
-
-                                <button
-                                    className="header-types-btn"
-                                    onClick={() => { setIsPersonManagerOpen(true); closeMobileMenu(); }}
-                                    title="Gestionar Personas"
-                                >
-                                    <Users size={18} />
-                                    <span>Personas</span>
-                                </button>
-
-                                <button onClick={() => { logout(); closeMobileMenu(); }} className="header-logout-btn" title="Cerrar Sesión">
-                                    <LogOut size={18} />
-                                    <span>Salir</span>
-                                </button>
                             </>
                         ) : (
                             <button
