@@ -146,13 +146,13 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                             </div>
                             <span className="info-label">Rango Seleccionado</span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', flexWrap: 'wrap' }}>
                             <input 
                                 type="date" 
                                 className="form-input"
                                 value={startDateStr}
                                 onChange={(e) => setStartDateStr(e.target.value)}
-                                style={{ flex: 1, padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)', background: 'var(--bg-body)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                                style={{ flex: '1 1 120px', minWidth: '120px', padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)', background: 'var(--bg-body)', color: 'var(--text-main)', fontSize: '0.9rem' }}
                             />
                             <span style={{ color: 'var(--text-muted)', fontWeight: '600' }}>al</span>
                             <input 
@@ -160,7 +160,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                                 className="form-input"
                                 value={endDateStr}
                                 onChange={(e) => setEndDateStr(e.target.value)}
-                                style={{ flex: 1, padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)', background: 'var(--bg-body)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                                style={{ flex: '1 1 120px', minWidth: '120px', padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)', background: 'var(--bg-body)', color: 'var(--text-main)', fontSize: '0.9rem' }}
                             />
                         </div>
                     </div>
@@ -170,12 +170,12 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                             <span className="info-label">Persona Asignada</span>
                             
                             {!isCreatingPerson ? (
-                                <div style={{ display: 'flex', width: '100%', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                <div style={{ display: 'flex', width: '100%', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
                                     <select 
                                         className="form-input" 
                                         value={personId} 
                                         onChange={(e) => setPersonId(e.target.value)}
-                                        style={{ flex: 1, padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)', background: 'var(--bg-body)', color: 'var(--text-main)', fontSize: '1rem', cursor: 'pointer' }}
+                                        style={{ flex: '1 1 180px', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)', background: 'var(--bg-body)', color: 'var(--text-main)', fontSize: '1rem', cursor: 'pointer' }}
                                     >
                                         <option value="">Seleccionar Persona...</option>
                                         {persons.map(p => (
@@ -183,26 +183,28 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                                         ))}
                                     </select>
                                     
-                                    {personId && (
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-body)', padding: '0 0.5rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)' }}>
-                                            <input 
-                                                type="color" 
-                                                value={editPersonColor}
-                                                onChange={(e) => setEditPersonColor(e.target.value)}
-                                                title="Editar color de la persona"
-                                                style={{ width: '32px', height: '32px', padding: 0, border: 'none', borderRadius: '0.25rem', cursor: 'pointer' }}
-                                            />
-                                        </div>
-                                    )}
-                                    
-                                    <button 
-                                        className="btn btn-secondary" 
-                                        onClick={() => setIsCreatingPerson(true)}
-                                        title="Nueva Persona"
-                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 1rem' }}
-                                    >
-                                        <UserPlus size={20} />
-                                    </button>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        {personId && (
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-body)', padding: '0 0.5rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)' }}>
+                                                <input 
+                                                    type="color" 
+                                                    value={editPersonColor}
+                                                    onChange={(e) => setEditPersonColor(e.target.value)}
+                                                    title="Editar color de la persona"
+                                                    style={{ width: '32px', height: '32px', padding: 0, border: 'none', borderRadius: '0.25rem', cursor: 'pointer' }}
+                                                />
+                                            </div>
+                                        )}
+                                        
+                                        <button 
+                                            className="btn btn-secondary" 
+                                            onClick={() => setIsCreatingPerson(true)}
+                                            title="Nueva Persona"
+                                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 1rem', height: '100%', minHeight: '48px' }}
+                                        >
+                                            <UserPlus size={20} />
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '1rem', marginTop: '0.5rem' }}>
@@ -235,28 +237,30 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     </div>
                 </div>
 
-                <div className="modal-footer" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid var(--border-color)' }}>
+                <div className="modal-footer" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap', gap: '0.75rem', borderTop: '1px solid var(--border-color)' }}>
                     {existingAssignmentId && (
                         <button 
                             className="btn" 
                             onClick={handleDelete}
                             disabled={loading}
-                            style={{ marginRight: 'auto', backgroundColor: '#ef4444', color: 'white', padding: '0.5rem 1rem', borderRadius: '0.5rem', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '600' }}
+                            style={{ marginRight: 'auto', backgroundColor: '#ef4444', color: 'white', padding: '0.5rem 1rem', borderRadius: '0.5rem', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '600', flex: '1 1 100%' }}
                         >
                             <Trash2 size={18} /> Eliminar
                         </button>
                     )}
-                    <button className="btn btn-secondary" onClick={onClose} disabled={loading} style={{ padding: '0.5rem 1.5rem', borderRadius: '0.5rem', fontWeight: '600' }}>
-                        Cancelar
-                    </button>
-                    <button 
-                        className="btn btn-primary" 
-                        onClick={handleSave}
-                        disabled={loading || (!personId && !isCreatingPerson) || (isCreatingPerson && !newPersonName.trim()) || !startDateStr || !endDateStr || startDateStr > endDateStr}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1.5rem', borderRadius: '0.5rem', fontWeight: '600' }}
-                    >
-                        <Save size={18} /> Guardar
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.75rem', width: existingAssignmentId ? '100%' : 'auto', justifyContent: 'flex-end', flex: '1 1 auto' }}>
+                        <button className="btn btn-secondary" onClick={onClose} disabled={loading} style={{ padding: '0.5rem 1.5rem', borderRadius: '0.5rem', fontWeight: '600' }}>
+                            Cancelar
+                        </button>
+                        <button 
+                            className="btn btn-primary" 
+                            onClick={handleSave}
+                            disabled={loading || (!personId && !isCreatingPerson) || (isCreatingPerson && !newPersonName.trim()) || !startDateStr || !endDateStr || startDateStr > endDateStr}
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1.5rem', borderRadius: '0.5rem', fontWeight: '600' }}
+                        >
+                            <Save size={18} /> Guardar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

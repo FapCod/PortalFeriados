@@ -285,9 +285,9 @@ export const HolidayCalendar: React.FC = () => {
                                             className={`calendar-day ${isWeekend ? 'weekend' : ''} ${hasHolidays ? 'has-holiday' : ''} ${isPast ? 'is-past' : ''} ${isInRange ? 'in-range' : ''} ${isConflict ? 'conflict' : ''} ${isAssignmentMode ? 'assignment-mode' : ''}`}
                                             style={{
                                                 ...(hasHolidays && !hasAssignments ? { backgroundColor: `${getTypeColor(dayHolidays[0].type)}15` } : {}),
-                                                ...(hasAssignments && !isConflict ? { backgroundColor: `${dayAssignments[0].person?.color}15`, borderBottom: `4px solid ${dayAssignments[0].person?.color}` } : {}),
-                                                ...(isConflict ? { backgroundColor: '#fef08a', borderBottom: `4px solid ${dayAssignments[0].person?.color}`, boxShadow: 'inset 0 0 0 2px #ef4444' } : {}),
-                                                ...(isInRange ? { backgroundColor: '#e0e7ff', border: '2px dashed #4f46e5' } : {}),
+                                                ...(hasAssignments && !isConflict ? { backgroundColor: `${dayAssignments[0].person?.color}15`, boxShadow: `inset 0 -2px 0 ${dayAssignments[0].person?.color}` } : {}),
+                                                ...(isConflict ? { backgroundColor: '#fef08a', boxShadow: `inset 0 0 0 2px #ef4444, inset 0 -2px 0 ${dayAssignments[0].person?.color}` } : {}),
+                                                ...(isInRange ? { backgroundColor: '#e0e7ff', outline: '2px dashed #4f46e5', outlineOffset: '-2px' } : {}),
                                                 cursor: (hasHolidays || isAssignmentMode) ? 'pointer' : 'default',
                                                 justifyContent: (hasAssignments || hasHolidays) ? 'space-between' : 'center',
                                                 padding: (hasAssignments || hasHolidays) ? '4px 0 2px 0' : '0'
@@ -395,6 +395,30 @@ export const HolidayCalendar: React.FC = () => {
                                 <strong>Rango:</strong> {format(new Date(parseInt(infoAssignments[0].startDate.split('-')[0]), parseInt(infoAssignments[0].startDate.split('-')[1]) - 1, parseInt(infoAssignments[0].startDate.split('-')[2])), "d 'de' MMMM, yyyy", { locale: es })} al {format(new Date(parseInt(infoAssignments[0].endDate.split('-')[0]), parseInt(infoAssignments[0].endDate.split('-')[1]) - 1, parseInt(infoAssignments[0].endDate.split('-')[2])), "d 'de' MMMM, yyyy", { locale: es })}
                             </p>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {isAssignmentMode && !(rangeStart && rangeEnd) && (
+                <div style={{ position: 'fixed', bottom: '1.5rem', left: 0, right: 0, display: 'flex', justifyContent: 'center', pointerEvents: 'none', zIndex: 999 }}>
+                    <div style={{ pointerEvents: 'auto', background: 'var(--bg-card)', padding: '0.5rem 1rem', borderRadius: '2rem', boxShadow: 'var(--shadow-xl)', display: 'flex', alignItems: 'center', gap: '0.75rem', border: '2px solid var(--primary)', animation: 'slideUp 0.3s ease-out forwards', maxWidth: '90vw' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                            <MousePointerClick size={18} />
+                            <span style={{ fontSize: '0.85rem' }}>Modo Asignación</span>
+                        </div>
+                        <div style={{ width: '1px', height: '20px', background: 'var(--border-color)', flexShrink: 0 }}></div>
+                        <button 
+                            onClick={() => {
+                                setAssignmentMode(false);
+                                setRangeStart(null);
+                                setRangeEnd(null);
+                            }}
+                            style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 600, padding: '0.25rem', fontSize: '0.85rem', transition: 'color 0.2s', whiteSpace: 'nowrap' }}
+                            onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
+                            onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
+                        >
+                            <X size={16} /> Salir
+                        </button>
                     </div>
                 </div>
             )}
