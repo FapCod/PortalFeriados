@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Plus, Trash2, Edit2, Save, RotateCcw } from 'lucide-react';
 import { holidayTypeService } from '../../services/holidayTypeService';
 import type { HolidayTypeDefinition } from '../../services/holidayTypeService';
+import { useHolidayStore } from '../../store/useHolidayStore';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import './HolidayTypeManager.css';
@@ -12,6 +14,7 @@ interface HolidayTypeManagerProps {
 }
 
 export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, onClose }) => {
+    const { loadHolidayTypes } = useHolidayStore();
     const [types, setTypes] = useState<HolidayTypeDefinition[]>([]);
     const [newTypeName, setNewTypeName] = useState('');
     const [newTypeColor, setNewTypeColor] = useState('#10B981');
@@ -57,6 +60,7 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
             setNewTypeName('');
             setNewTypeColor('#10B981');
             await loadTypes();
+            await loadHolidayTypes();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al agregar tipo');
         }
@@ -67,6 +71,7 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
             try {
                 await holidayTypeService.deleteType(id);
                 await loadTypes();
+                await loadHolidayTypes();
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Error al eliminar tipo');
             }
@@ -91,6 +96,7 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
             await holidayTypeService.updateType(id, editName, editColor);
             setEditingId(null);
             await loadTypes();
+            await loadHolidayTypes();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al actualizar tipo');
         }
@@ -98,7 +104,7 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div className="holiday-type-overlay" ref={containerRef}>
             <div className="holiday-type-modal">
                 <div className="holiday-type-header">
@@ -188,6 +194,7 @@ export const HolidayTypeManager: React.FC<HolidayTypeManagerProps> = ({ isOpen, 
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

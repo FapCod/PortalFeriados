@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import { X, Eye, EyeOff } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
@@ -52,7 +53,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, allowClose = true
         setLoading(false);
     };
 
-    return (
+    return createPortal(
         <div className="login-modal-overlay" ref={containerRef} onClick={() => allowClose && onClose && onClose()}>
             <div className="login-modal" onClick={(e) => e.stopPropagation()}>
                 {allowClose && onClose && (
@@ -123,6 +124,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, allowClose = true
                     </a>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

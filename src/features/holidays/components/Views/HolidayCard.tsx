@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { Holiday } from '../../../../services/holidayService';
 import type { CustomHoliday } from '../../../../services/customHolidayService';
 import { format } from 'date-fns';
@@ -117,7 +118,7 @@ export const HolidayCard: React.FC<HolidayCardProps> = ({ holiday, isCustom = fa
                 />
             )}
 
-            {showDeleteConfirm && (
+            {showDeleteConfirm && createPortal(
                 <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
                     <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
                         <h3 className="confirm-title">¿Eliminar feriado?</h3>
@@ -139,7 +140,8 @@ export const HolidayCard: React.FC<HolidayCardProps> = ({ holiday, isCustom = fa
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );

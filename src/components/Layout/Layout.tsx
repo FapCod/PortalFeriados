@@ -28,6 +28,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
             </footer>
             <BackToTop />
+            <div id="theme-veil" className="theme-veil" />
         </div>
     );
 };

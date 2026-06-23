@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useHolidayStore } from '../../../../store/useHolidayStore';
 import { holidayService } from '../../../../services/holidayService';
 import type { Country } from '../../../../services/holidayService';
@@ -102,7 +103,7 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div className="modal-overlay" ref={containerRef} onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
@@ -236,6 +237,7 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

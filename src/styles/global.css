@@ -121,4 +121,17 @@ select,
 .header-brand,
 .header-auth > * {
     will-change: transform, opacity;
+}
+
+/* Velo de transición de tema (Efecto cortina circular) */
+.theme-veil {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999;
+    display: none;
+    pointer-events: none;
+    will-change: clip-path;
 }

@@ -72,6 +72,58 @@ export const Header = () => {
 
     const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
+    const handleThemeToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
+        const veil = document.getElementById('theme-veil');
+        if (!veil) {
+            toggleTheme();
+            closeMobileMenu();
+            return;
+        }
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+
+        const nextTheme = theme === 'light' ? 'dark' : 'light';
+        const nextBgColor = nextTheme === 'light' ? '#f8fafc' : '#0f172a';
+
+        // Prepare the circular veil overlay at the button position
+        gsap.set(veil, {
+            backgroundColor: nextBgColor,
+            clipPath: `circle(0% at ${x}px ${y}px)`,
+            opacity: 1, // Ensure opacity is reset to 1
+            display: 'block',
+            pointerEvents: 'all'
+        });
+
+        // Animate the circle clipPath to cover the full viewport
+        gsap.to(veil, {
+            clipPath: `circle(150% at ${x}px ${y}px)`,
+            duration: 0.85,
+            ease: 'power3.inOut',
+            onComplete: () => {
+                // Switch theme and close mobile menu while screen is covered
+                toggleTheme();
+                closeMobileMenu();
+                
+                // Fade out the veil smoothly to reveal the new theme gently
+                gsap.to(veil, {
+                    opacity: 0,
+                    duration: 0.8,
+                    ease: 'power2.out',
+                    onComplete: () => {
+                        // Reset the veil states for the next toggle
+                        gsap.set(veil, {
+                            display: 'none',
+                            opacity: 1,
+                            pointerEvents: 'none'
+                        });
+                    }
+                });
+            }
+        });
+    };
+
     return (
         <header className="header" ref={containerRef}>
             <div className="header-content">
@@ -97,7 +149,7 @@ export const Header = () => {
                     <div className="header-auth">
                         <button
                             className="header-theme-btn"
-                            onClick={() => { toggleTheme(); closeMobileMenu(); }}
+                            onClick={handleThemeToggle}
                             title={`Cambiar a modo ${theme === 'light' ? 'oscuro' : 'claro'}`}
                         >
                             {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
