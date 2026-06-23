@@ -9,6 +9,7 @@ import { useHolidayStore } from '../../../../store/useHolidayStore';
 import { useAuth } from '../../../../context/AuthContext';
 import { AddHolidayForm } from '../Controls/AddHolidayForm';
 import { holidayTypeService } from '../../../../services/holidayTypeService';
+import { useToastStore } from '../../../../store/useToastStore';
 import './HolidayCard.css';
 
 interface HolidayCardProps {
@@ -19,6 +20,7 @@ interface HolidayCardProps {
 export const HolidayCard: React.FC<HolidayCardProps> = ({ holiday, isCustom = false }) => {
     const { deleteCustomHoliday } = useHolidayStore();
     const { isAdmin } = useAuth();
+    const addToast = useToastStore((state) => state.addToast);
     const [showEditForm, setShowEditForm] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -33,8 +35,13 @@ export const HolidayCard: React.FC<HolidayCardProps> = ({ holiday, isCustom = fa
 
     const handleDelete = async () => {
         if (isCustom && 'id' in holiday) {
-            await deleteCustomHoliday(holiday.id);
+            const success = await deleteCustomHoliday(holiday.id);
             setShowDeleteConfirm(false);
+            if (success) {
+                addToast('¡Feriado eliminado con éxito!', 'success');
+            } else {
+                addToast('Error al eliminar el feriado', 'error');
+            }
         }
     };
 

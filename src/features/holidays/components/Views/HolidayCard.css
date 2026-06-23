@@ -198,51 +198,6 @@
     border-color: #dc2626;
 }
 
-/* Confirmation dialog */
-.confirm-dialog {
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    max-width: 400px;
-    width: 90%;
-    box-shadow: var(--shadow-lg);
-}
-
-.confirm-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-main);
-    margin: 0 0 0.75rem 0;
-}
-
-.confirm-message {
-    color: var(--text-muted);
-    margin: 0 0 1.5rem 0;
-    line-height: 1.5;
-}
-
-.confirm-actions {
-    display: flex;
-    gap: 0.75rem;
-    justify-content: flex-end;
-}
-
-.btn-delete {
-    background-color: #dc2626;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-md);
-    border: none;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.btn-delete:hover {
-    background-color: #b91c1c;
-    transform: translateY(-1px);
-}
-
 @media (max-width: 640px) {
     .holiday-card {
         padding: 1rem;
@@ -256,12 +211,5 @@
     .holiday-type {
         align-self: flex-start;
     }
-
-    .confirm-actions {
-        flex-direction: column-reverse;
-    }
-
-    .confirm-actions .btn {
-        width: 100%;
-    }
 }
+

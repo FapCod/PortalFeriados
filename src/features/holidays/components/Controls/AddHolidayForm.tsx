@@ -7,6 +7,7 @@ import type { CustomHolidayFormData } from '../../../../services/customHolidaySe
 import { X, Calendar, Globe, MapPin, Tag, AlertCircle } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { useToastStore } from '../../../../store/useToastStore';
 import './AddHolidayForm.css';
 
 interface AddHolidayFormProps {
@@ -61,6 +62,7 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
         }
     }, { dependencies: [isOpen], scope: containerRef });
 
+    const addToast = useToastStore((state) => state.addToast);
     const holidayTypes = storeTypes.map((t) => ({
         value: t.id,
         label: t.name
@@ -78,6 +80,12 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
         setIsSubmitting(false);
 
         if (result.success) {
+            addToast(
+                editHolidayId 
+                    ? '¡Feriado modificado con éxito!' 
+                    : '¡Feriado agregado con éxito!', 
+                'success'
+            );
             onClose();
             if (onSuccess) onSuccess();
             // Reset form
@@ -89,7 +97,9 @@ export const AddHolidayForm: React.FC<AddHolidayFormProps> = ({
                 type: 'public',
             });
         } else {
-            setErrors(result.errors || ['Error al guardar el feriado']);
+            const errorMsg = result.errors?.[0] || 'Error al guardar el feriado';
+            setErrors(result.errors || [errorMsg]);
+            addToast(errorMsg, 'error');
         }
     };
 

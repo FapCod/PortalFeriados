@@ -1,6 +1,7 @@
 import React from 'react';
 import { Header } from './Header';
 import { BackToTop } from '../Common/BackToTop';
+import { ToastContainer } from '../Common/ToastContainer';
 import './Layout.css';
 
 interface LayoutProps {
@@ -29,6 +30,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             </footer>
             <BackToTop />
             <div id="theme-veil" className="theme-veil" />
+            <ToastContainer />
         </div>
     );
 };
