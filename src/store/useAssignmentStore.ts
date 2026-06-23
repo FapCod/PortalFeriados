@@ -45,13 +45,27 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
 
     updatePerson: async (id, data) => {
         const result = await personService.updatePerson(id, data);
-        if (result.success) await get().loadPersons();
+        if (result.success) {
+            await get().loadPersons();
+            set((state) => ({
+                assignments: state.assignments.map(a => 
+                    a.personId === id 
+                        ? { ...a, person: { ...a.person, ...data } } as any
+                        : a
+                )
+            }));
+        }
         return { success: result.success, errors: result.error ? [result.error] : undefined };
     },
 
     deletePerson: async (id) => {
         const success = await personService.deletePerson(id);
-        if (success) await get().loadPersons();
+        if (success) {
+            await get().loadPersons();
+            set((state) => ({
+                assignments: state.assignments.filter(a => a.personId !== id)
+            }));
+        }
         return success;
     },
 

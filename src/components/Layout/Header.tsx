@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Calendar, User, LogOut, Plus, Settings, Sun, Moon, Menu, X as CloseIcon } from 'lucide-react';
+import { Calendar, User, LogOut, Plus, Settings, Sun, Moon, Menu, X as CloseIcon, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { AddHolidayForm } from '../../features/holidays/components/Controls/AddHolidayForm';
 import { HolidayTypeManager } from '../Admin/HolidayTypeManager';
+import { PersonManager } from '../Admin/PersonManager';
 import { LoginForm } from '../Auth/LoginForm';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
@@ -14,6 +15,7 @@ export const Header = () => {
     const { theme, toggleTheme } = useTheme();
     const [isAddFormOpen, setIsAddFormOpen] = useState(false);
     const [isTypeManagerOpen, setIsTypeManagerOpen] = useState(false);
+    const [isPersonManagerOpen, setIsPersonManagerOpen] = useState(false);
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -184,6 +186,15 @@ export const Header = () => {
                                     </>
                                 )}
 
+                                <button
+                                    className="header-types-btn"
+                                    onClick={() => { setIsPersonManagerOpen(true); closeMobileMenu(); }}
+                                    title="Gestionar Personas"
+                                >
+                                    <Users size={18} />
+                                    <span>Personas</span>
+                                </button>
+
                                 <button onClick={() => { logout(); closeMobileMenu(); }} className="header-logout-btn" title="Cerrar Sesión">
                                     <LogOut size={18} />
                                     <span>Salir</span>
@@ -212,6 +223,11 @@ export const Header = () => {
             <HolidayTypeManager
                 isOpen={isTypeManagerOpen}
                 onClose={() => setIsTypeManagerOpen(false)}
+            />
+
+            <PersonManager
+                isOpen={isPersonManagerOpen}
+                onClose={() => setIsPersonManagerOpen(false)}
             />
 
             {isLoginOpen && (

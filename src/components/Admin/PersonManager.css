@@ -1,0 +1,264 @@
+.person-manager-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    padding: 1rem;
+    pointer-events: all;
+}
+
+.person-manager-modal {
+    background: var(--bg-card);
+    width: 100%;
+    max-width: 500px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-2xl);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    position: relative;
+}
+
+.person-manager-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-body);
+}
+
+.person-manager-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.person-manager-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.person-manager-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-main);
+}
+
+.person-manager-content {
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.person-manager-error {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Formulario para agregar */
+.person-manager-form {
+    display: flex;
+    gap: 0.75rem;
+    align-items: stretch;
+}
+
+.person-manager-form .form-group {
+    margin: 0;
+    flex: 1;
+}
+
+.person-manager-form .form-input {
+    width: 100%;
+    height: 42px;
+    background: var(--bg-body);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0 1rem;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.person-manager-form .form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.person-manager-form .form-color-input {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    background: var(--bg-body);
+}
+
+.add-person-btn {
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 0 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    height: 42px;
+}
+
+/* Lista de Personas */
+.persons-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.person-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--bg-body);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+}
+
+.person-item:hover {
+    border-color: var(--primary-light);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.person-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.person-color-indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.person-name {
+    font-weight: 500;
+    color: var(--text-main);
+    font-size: 0.95rem;
+}
+
+.person-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.person-actions button {
+    background: transparent;
+    border: none;
+    padding: 0.4rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.person-actions .edit-btn {
+    color: var(--text-muted);
+}
+.person-actions .edit-btn:hover {
+    background: var(--bg-hover);
+    color: var(--primary);
+}
+
+.person-actions .delete-btn {
+    color: var(--text-muted);
+}
+.person-actions .delete-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Formulario de Edición (In-line) */
+.person-edit-form {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.person-edit-form .edit-input {
+    flex: 1;
+    height: 36px;
+    background: var(--bg-card);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-sm);
+    padding: 0 0.75rem;
+    color: var(--text-main);
+    font-size: 0.95rem;
+}
+
+.person-edit-form .edit-color {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.edit-actions button {
+    height: 36px;
+    width: 36px;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.edit-actions .save-btn {
+    /* Estilos controlados por btn-primary global */
+}
+
+.edit-actions .cancel-btn {
+    background: var(--bg-hover);
+    color: var(--text-muted);
+}
+.edit-actions .cancel-btn:hover {
+    background: var(--border-color);
+    color: var(--text-main);
+}
