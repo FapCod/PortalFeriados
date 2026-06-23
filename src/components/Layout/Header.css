@@ -115,12 +115,14 @@
     text-align: left;
 }
 
-.dropdown-item:hover {
-    background: var(--bg-hover);
+.dropdown-item:hover,
+.dropdown-item:active {
+    background: rgba(99, 102, 241, 0.1);
     color: var(--primary);
 }
 
-.dropdown-item.text-danger:hover {
+.dropdown-item.text-danger:hover,
+.dropdown-item.text-danger:active {
     background: rgba(239, 68, 68, 0.1);
     color: #ef4444;
 }
