@@ -4,12 +4,13 @@ import { holidayService } from '../../../../services/holidayService';
 import type { Holiday } from '../../../../services/holidayService';
 import type { CustomHoliday } from '../../../../services/customHolidayService';
 import { holidayTypeService } from '../../../../services/holidayTypeService';
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, getDay } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, getDay, isBefore, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AlertCircle } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { HolidayDetailModal } from './HolidayDetailModal';
 import './HolidayCalendar.css';
 
 /**
@@ -18,6 +19,8 @@ import './HolidayCalendar.css';
 export const HolidayCalendar: React.FC = () => {
     const { selectedCountry, selectedYear, filterType, customHolidays } = useHolidayStore();
     const containerRef = useRef<HTMLDivElement>(null);
+    const [selectedHoliday, setSelectedHoliday] = React.useState<Holiday | CustomHoliday | null>(null);
+    const [isModalOpen, setIsModalOpen] = React.useState(false);
 
     const holidays = useMemo(() => {
         if (!selectedCountry) return [];
@@ -94,6 +97,8 @@ export const HolidayCalendar: React.FC = () => {
         return holidayTypeService.getColorForType(type);
     };
 
+    const today = startOfDay(new Date());
+
     // Animate calendar months on scroll with ScrollTrigger.batch (UI/UX Pro Max)
     useGSAP(() => {
         if (selectedCountry) {
@@ -167,18 +172,23 @@ export const HolidayCalendar: React.FC = () => {
                                     const dayHolidays = getHolidaysForDay(day);
                                     const isWeekend = getDay(day) === 0 || getDay(day) === 6;
                                     const hasHolidays = dayHolidays.length > 0;
+                                    const isPast = isBefore(day, today);
 
                                     return (
                                         <div
                                             key={dayIndex}
-                                            className={`calendar-day ${isWeekend ? 'weekend' : ''} ${hasHolidays ? 'has-holiday' : ''
-                                                }`}
-                                            style={
-                                                hasHolidays
-                                                    ? { backgroundColor: `${getTypeColor(dayHolidays[0].type)}15` }
-                                                    : undefined
-                                            }
+                                            className={`calendar-day ${isWeekend ? 'weekend' : ''} ${hasHolidays ? 'has-holiday' : ''} ${isPast ? 'is-past' : ''}`}
+                                            style={{
+                                                ...(hasHolidays ? { backgroundColor: `${getTypeColor(dayHolidays[0].type)}15` } : {}),
+                                                cursor: hasHolidays ? 'pointer' : 'default'
+                                            }}
                                             title={hasHolidays ? dayHolidays.map(h => h.name).join(', ') : undefined}
+                                            onClick={() => {
+                                                if (hasHolidays) {
+                                                    setSelectedHoliday(dayHolidays[0]);
+                                                    setIsModalOpen(true);
+                                                }
+                                            }}
                                         >
                                             <span className="calendar-day-number">{format(day, 'd')}</span>
                                             {hasHolidays && (
@@ -222,6 +232,15 @@ export const HolidayCalendar: React.FC = () => {
                         ))}
                     </div>
                 </div>
+            )}
+
+            {selectedHoliday && (
+                <HolidayDetailModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    holiday={selectedHoliday}
+                    isCustom={'isCustom' in selectedHoliday ? (selectedHoliday as CustomHoliday).isCustom : false}
+                />
             )}
         </div>
     );

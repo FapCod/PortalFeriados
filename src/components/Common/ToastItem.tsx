@@ -17,23 +17,6 @@ export const ToastItem: React.FC<ToastItemProps> = ({ toast }) => {
     const removeToast = useToastStore((state) => state.removeToast);
     const toastRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(() => {
-        if (!toastRef.current) return;
-
-        // Entrance animation
-        gsap.fromTo(toastRef.current,
-            { x: 120, opacity: 0, scale: 0.9 },
-            { x: 0, opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.2)' }
-        );
-
-        // Auto close timer
-        const timer = setTimeout(() => {
-            handleClose();
-        }, 3500);
-
-        return () => clearTimeout(timer);
-    }, { scope: toastRef });
-
     const handleClose = () => {
         if (!toastRef.current) {
             removeToast(toast.id);
@@ -52,6 +35,23 @@ export const ToastItem: React.FC<ToastItemProps> = ({ toast }) => {
             }
         });
     };
+
+    useGSAP(() => {
+        if (!toastRef.current) return;
+
+        // Entrance animation
+        gsap.fromTo(toastRef.current,
+            { x: 120, opacity: 0, scale: 0.9 },
+            { x: 0, opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.2)' }
+        );
+
+        // Auto close timer
+        const timer = setTimeout(() => {
+            handleClose();
+        }, 3500);
+
+        return () => clearTimeout(timer);
+    }, { scope: toastRef });
 
     const getIcon = () => {
         switch (toast.type) {
