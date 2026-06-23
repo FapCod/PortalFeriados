@@ -262,3 +262,29 @@
     background: var(--border-color);
     color: var(--text-main);
 }
+
+/* Responsive adjustments for mobile */
+@media (max-width: 480px) {
+    .person-manager-form {
+        flex-wrap: wrap;
+    }
+    .person-manager-form .form-group:first-child {
+        flex: 1 1 100%;
+        margin-bottom: 0.25rem;
+    }
+    .person-manager-form .add-person-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .person-edit-form {
+        flex-wrap: wrap;
+    }
+    .person-edit-form .edit-input {
+        flex: 1 1 100%;
+    }
+    .person-edit-form .edit-actions {
+        flex: 1;
+        justify-content: flex-end;
+    }
+}
