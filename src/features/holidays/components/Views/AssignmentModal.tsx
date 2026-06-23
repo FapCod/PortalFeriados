@@ -4,7 +4,6 @@ import { useHolidayStore } from '../../../../store/useHolidayStore';
 import { personService } from '../../../../services/personService';
 import { X, UserPlus, Trash2, Save } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import './HolidayDetailModal.css';
 
 interface AssignmentModalProps {
