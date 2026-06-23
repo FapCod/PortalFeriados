@@ -4,13 +4,17 @@ import { holidayService } from '../../../../services/holidayService';
 import type { Holiday } from '../../../../services/holidayService';
 import type { CustomHoliday } from '../../../../services/customHolidayService';
 import { holidayTypeService } from '../../../../services/holidayTypeService';
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, getDay, isBefore, startOfDay } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, getDay, isBefore, startOfDay, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, MousePointerClick, User, X } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { HolidayDetailModal } from './HolidayDetailModal';
+import { AssignmentModal } from './AssignmentModal';
+import { useAuth } from '../../../../context/AuthContext';
+import { useAssignmentStore } from '../../../../store/useAssignmentStore';
+import type { Assignment } from '../../../../services/assignmentService';
 import './HolidayCalendar.css';
 
 /**
@@ -18,9 +22,33 @@ import './HolidayCalendar.css';
  */
 export const HolidayCalendar: React.FC = () => {
     const { selectedCountry, selectedYear, filterType, customHolidays } = useHolidayStore();
+    const { isAuthenticated } = useAuth();
+    const { 
+        isAssignmentMode, setAssignmentMode, assignments, loadAssignments, loadPersons 
+    } = useAssignmentStore();
     const containerRef = useRef<HTMLDivElement>(null);
     const [selectedHoliday, setSelectedHoliday] = React.useState<Holiday | CustomHoliday | null>(null);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
+    
+    const [rangeStart, setRangeStart] = React.useState<Date | null>(null);
+    const [rangeEnd, setRangeEnd] = React.useState<Date | null>(null);
+    const [isAssignmentModalOpen, setIsAssignmentModalOpen] = React.useState(false);
+    const [selectedAssignmentId, setSelectedAssignmentId] = React.useState<string | null>(null);
+    const [infoAssignments, setInfoAssignments] = React.useState<Assignment[]>([]);
+
+    React.useEffect(() => {
+        if (selectedCountry) {
+            loadAssignments(selectedCountry.code, selectedYear);
+            loadPersons();
+        }
+    }, [selectedCountry, selectedYear, loadAssignments, loadPersons]);
+    
+    React.useEffect(() => {
+        if (!isAssignmentMode) {
+            setRangeStart(null);
+            setRangeEnd(null);
+        }
+    }, [isAssignmentMode]);
 
     const holidays = useMemo(() => {
         if (!selectedCountry) return [];
@@ -93,6 +121,68 @@ export const HolidayCalendar: React.FC = () => {
         return dayHolidays;
     };
 
+    const getAssignmentsForDay = (day: Date) => {
+        if (!selectedCountry) return [];
+        return assignments.filter(a => {
+            if (a.countryCode !== selectedCountry.code) return false;
+            
+            const startParts = a.startDate.split('-');
+            const endParts = a.endDate.split('-');
+            
+            const start = new Date(parseInt(startParts[0]), parseInt(startParts[1]) - 1, parseInt(startParts[2]));
+            const end = new Date(parseInt(endParts[0]), parseInt(endParts[1]) - 1, parseInt(endParts[2]));
+            const current = startOfDay(day);
+            
+            return (isSameDay(current, start) || isSameDay(current, end) || (isBefore(start, current) && isBefore(current, end)));
+        });
+    };
+
+    const isDayInSelectionRange = (day: Date) => {
+        if (!rangeStart) return false;
+        if (!rangeEnd) return isSameDay(day, rangeStart);
+        return isWithinInterval(day, { start: rangeStart, end: rangeEnd }) || isSameDay(day, rangeStart) || isSameDay(day, rangeEnd);
+    };
+
+    const handleDayClick = (day: Date, hasHolidays: boolean, dayHolidays: Holiday[], hasAssignments: boolean, dayAssignments: Assignment[]) => {
+        if (isAssignmentMode) {
+            // Edit existing assignment
+            if (dayAssignments.length > 0 && !rangeStart) {
+                setSelectedAssignmentId(dayAssignments[0].id);
+                // Important to fix timezones: ensure we get local start of day
+                const startStr = dayAssignments[0].startDate;
+                const endStr = dayAssignments[0].endDate;
+                setRangeStart(new Date(parseInt(startStr.split('-')[0]), parseInt(startStr.split('-')[1]) - 1, parseInt(startStr.split('-')[2])));
+                setRangeEnd(new Date(parseInt(endStr.split('-')[0]), parseInt(endStr.split('-')[1]) - 1, parseInt(endStr.split('-')[2])));
+                setIsAssignmentModalOpen(true);
+                return;
+            }
+
+            if (!rangeStart) {
+                setRangeStart(day);
+                setRangeEnd(null);
+            } else if (!rangeEnd) {
+                if (isBefore(day, rangeStart)) {
+                    setRangeEnd(rangeStart);
+                    setRangeStart(day);
+                } else {
+                    setRangeEnd(day);
+                }
+                setSelectedAssignmentId(null);
+                setIsAssignmentModalOpen(true);
+            } else {
+                setRangeStart(day);
+                setRangeEnd(null);
+            }
+        } else {
+            if (hasHolidays) {
+                setSelectedHoliday(dayHolidays[0]);
+                setIsModalOpen(true);
+            } else if (hasAssignments) {
+                setInfoAssignments(dayAssignments);
+            }
+        }
+    };
+
     const getTypeColor = (type: string): string => {
         return holidayTypeService.getColorForType(type);
     };
@@ -138,10 +228,20 @@ export const HolidayCalendar: React.FC = () => {
 
     return (
         <div className="holiday-calendar" ref={containerRef}>
-            <div className="calendar-header">
+            <div className="calendar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2 className="calendar-title">
                     Calendario de Feriados - {selectedCountry.name} {selectedYear}
                 </h2>
+                {isAuthenticated && (
+                    <button 
+                        className={`btn ${isAssignmentMode ? 'btn-primary' : 'btn-secondary'}`}
+                        onClick={() => setAssignmentMode(!isAssignmentMode)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}
+                    >
+                        <MousePointerClick size={18} />
+                        {isAssignmentMode ? 'Salir Modo Asignación' : 'Modo Asignación'}
+                    </button>
+                )}
             </div>
 
             <div className="calendar-grid">
@@ -170,40 +270,61 @@ export const HolidayCalendar: React.FC = () => {
 
                                 {month.days.map((day, dayIndex) => {
                                     const dayHolidays = getHolidaysForDay(day);
+                                    const dayAssignments = getAssignmentsForDay(day);
                                     const isWeekend = getDay(day) === 0 || getDay(day) === 6;
                                     const hasHolidays = dayHolidays.length > 0;
+                                    const hasAssignments = dayAssignments.length > 0;
                                     const isPast = isBefore(day, today);
+                                    const isInRange = isDayInSelectionRange(day);
+                                    
+                                    const isConflict = hasHolidays && hasAssignments;
 
                                     return (
                                         <div
                                             key={dayIndex}
-                                            className={`calendar-day ${isWeekend ? 'weekend' : ''} ${hasHolidays ? 'has-holiday' : ''} ${isPast ? 'is-past' : ''}`}
+                                            className={`calendar-day ${isWeekend ? 'weekend' : ''} ${hasHolidays ? 'has-holiday' : ''} ${isPast ? 'is-past' : ''} ${isInRange ? 'in-range' : ''} ${isConflict ? 'conflict' : ''} ${isAssignmentMode ? 'assignment-mode' : ''}`}
                                             style={{
-                                                ...(hasHolidays ? { backgroundColor: `${getTypeColor(dayHolidays[0].type)}15` } : {}),
-                                                cursor: hasHolidays ? 'pointer' : 'default'
+                                                ...(hasHolidays && !hasAssignments ? { backgroundColor: `${getTypeColor(dayHolidays[0].type)}15` } : {}),
+                                                ...(hasAssignments && !isConflict ? { backgroundColor: `${dayAssignments[0].person?.color}15`, borderBottom: `4px solid ${dayAssignments[0].person?.color}` } : {}),
+                                                ...(isConflict ? { backgroundColor: '#fef08a', borderBottom: `4px solid ${dayAssignments[0].person?.color}`, boxShadow: 'inset 0 0 0 2px #ef4444' } : {}),
+                                                ...(isInRange ? { backgroundColor: '#e0e7ff', border: '2px dashed #4f46e5' } : {}),
+                                                cursor: (hasHolidays || isAssignmentMode) ? 'pointer' : 'default',
+                                                justifyContent: (hasAssignments || hasHolidays) ? 'space-between' : 'center',
+                                                padding: (hasAssignments || hasHolidays) ? '4px 0 2px 0' : '0'
                                             }}
-                                            title={hasHolidays ? dayHolidays.map(h => h.name).join(', ') : undefined}
-                                            onClick={() => {
-                                                if (hasHolidays) {
-                                                    setSelectedHoliday(dayHolidays[0]);
-                                                    setIsModalOpen(true);
-                                                }
-                                            }}
+                                            title={
+                                                (hasHolidays ? dayHolidays.map(h => h.name).join(', ') : '') + 
+                                                (hasHolidays && hasAssignments ? ' | ' : '') +
+                                                (hasAssignments ? `Asignado a: ${dayAssignments.map(a => a.person?.name).join(', ')}` : '')
+                                            }
+                                            onClick={() => handleDayClick(day, hasHolidays, dayHolidays, hasAssignments, dayAssignments)}
                                         >
-                                            <span className="calendar-day-number">{format(day, 'd')}</span>
+                                            <span className="calendar-day-number" style={{ lineHeight: 1 }}>{format(day, 'd')}</span>
+                                            
                                             {hasHolidays && (
-                                                <div className="calendar-day-indicators">
+                                                <div className="calendar-day-indicators" style={{ margin: 'auto 0' }}>
                                                     {dayHolidays.slice(0, 3).map((holiday, idx) => (
                                                         <div
                                                             key={idx}
                                                             className="calendar-day-indicator"
                                                             style={{ backgroundColor: getTypeColor(holiday.type) }}
-                                                            title={holiday.name}
                                                         />
                                                     ))}
                                                     {dayHolidays.length > 3 && (
                                                         <span className="calendar-day-more">+{dayHolidays.length - 3}</span>
                                                     )}
+                                                </div>
+                                            )}
+
+                                            {hasAssignments && (
+                                                <div className="assignment-label" style={{ color: dayAssignments[0].person?.color || '#333', margin: 0, lineHeight: 1 }}>
+                                                    {(() => {
+                                                        const name = dayAssignments[0].person?.name || '';
+                                                        const parts = name.split(' ').filter(p => p.trim() !== '');
+                                                        if (parts.length === 0) return '';
+                                                        if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+                                                        return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+                                                    })()}
                                                 </div>
                                             )}
                                         </div>
@@ -234,13 +355,48 @@ export const HolidayCalendar: React.FC = () => {
                 </div>
             )}
 
-            {selectedHoliday && (
+            {selectedHoliday && !isAssignmentMode && (
                 <HolidayDetailModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     holiday={selectedHoliday}
                     isCustom={'isCustom' in selectedHoliday ? (selectedHoliday as CustomHoliday).isCustom : false}
                 />
+            )}
+
+            <AssignmentModal
+                isOpen={isAssignmentModalOpen}
+                onClose={() => {
+                    setIsAssignmentModalOpen(false);
+                    setRangeStart(null);
+                    setRangeEnd(null);
+                    setSelectedAssignmentId(null);
+                }}
+                selectionStart={rangeStart}
+                selectionEnd={rangeEnd}
+                existingAssignmentId={selectedAssignmentId}
+            />
+
+            {infoAssignments.length > 0 && !isAssignmentMode && (
+                <div className="holiday-detail-overlay" onClick={() => setInfoAssignments([])} style={{ zIndex: 1100 }}>
+                    <div className="holiday-detail-modal glass-panel" onClick={e => e.stopPropagation()} style={{ padding: '2rem' }}>
+                        <button className="close-btn" onClick={() => setInfoAssignments([])}><X size={20} /></button>
+                        <div className="modal-header" style={{ padding: '0 0 1.5rem 0' }}>
+                            <div className="modal-type-badge" style={{ backgroundColor: infoAssignments[0].person?.color || '#3b82f6', color: 'white' }}>
+                                <User size={16} />
+                                <span>Persona Asignada</span>
+                            </div>
+                        </div>
+                        <div className="modal-body" style={{ padding: '0' }}>
+                            <h2 className="modal-title" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
+                                {infoAssignments.map(a => a.person?.name).join(', ')}
+                            </h2>
+                            <p style={{ margin: '0', color: 'var(--text-main)', fontSize: '1rem' }}>
+                                <strong>Rango:</strong> {format(new Date(parseInt(infoAssignments[0].startDate.split('-')[0]), parseInt(infoAssignments[0].startDate.split('-')[1]) - 1, parseInt(infoAssignments[0].startDate.split('-')[2])), "d 'de' MMMM, yyyy", { locale: es })} al {format(new Date(parseInt(infoAssignments[0].endDate.split('-')[0]), parseInt(infoAssignments[0].endDate.split('-')[1]) - 1, parseInt(infoAssignments[0].endDate.split('-')[2])), "d 'de' MMMM, yyyy", { locale: es })}
+                            </p>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
