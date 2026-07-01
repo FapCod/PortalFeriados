@@ -121,18 +121,21 @@ class CustomHolidayService {
 
             if (error) throw error;
 
-            const mapped = (data || []).map((row) => ({
-                id: row.id,
-                name: row.name,
-                date: row.date,
-                start: new Date(row.start_date),
-                end: new Date(row.end_date),
-                type: row.holiday_types?.code || 'public',
-                countryCode: row.country_code,
-                region: row.region || undefined,
-                rule: row.rule || 'custom',
-                isCustom: true as const,
-            }));
+            const mapped = (data || []).map((row) => {
+                const [yr, mo, dy] = row.date.split('-').map(Number);
+                return {
+                    id: row.id,
+                    name: row.name,
+                    date: row.date,
+                    start: new Date(yr, mo - 1, dy),
+                    end: new Date(yr, mo - 1, dy + 1),
+                    type: row.holiday_types?.code || 'public',
+                    countryCode: row.country_code,
+                    region: row.region || undefined,
+                    rule: row.rule || 'custom',
+                    isCustom: true as const,
+                };
+            });
 
             // Sort by start date ascending
             return mapped.sort((a, b) => a.start.getTime() - b.start.getTime());
@@ -232,12 +235,13 @@ class CustomHolidayService {
 
             if (insertError) throw insertError;
 
+            const [yr, mo, dy] = inserted.date.split('-').map(Number);
             const holiday: CustomHoliday = {
                 id: inserted.id,
                 name: inserted.name,
                 date: inserted.date,
-                start: new Date(inserted.start_date),
-                end: new Date(inserted.end_date),
+                start: new Date(yr, mo - 1, dy),
+                end: new Date(yr, mo - 1, dy + 1),
                 type: inserted.holiday_types?.code || 'public',
                 countryCode: inserted.country_code,
                 region: inserted.region || undefined,
@@ -313,12 +317,13 @@ class CustomHolidayService {
 
             if (updateError) throw updateError;
 
+            const [yr, mo, dy] = updated.date.split('-').map(Number);
             const holiday: CustomHoliday = {
                 id: updated.id,
                 name: updated.name,
                 date: updated.date,
-                start: new Date(updated.start_date),
-                end: new Date(updated.end_date),
+                start: new Date(yr, mo - 1, dy),
+                end: new Date(yr, mo - 1, dy + 1),
                 type: updated.holiday_types?.code || 'public',
                 countryCode: updated.country_code,
                 region: updated.region || undefined,

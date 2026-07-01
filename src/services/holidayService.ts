@@ -117,14 +117,19 @@ class HolidayService {
       }
 
       // Map and sanitize holiday data
-      return holidays.map(h => ({
-        date: String(h.date || ''),
-        start: new Date(h.start),
-        end: new Date(h.end),
-        name: String(h.name || 'Unknown Holiday'),
-        type: String(h.type || 'public'),
-        rule: String(h.rule || '')
-      }));
+      return holidays.map(h => {
+        const dateStr = String(h.date || '');
+        const dateParts = dateStr.split(' ')[0];
+        const [yr, mo, dy] = dateParts.split('-').map(Number);
+        return {
+          date: dateStr,
+          start: new Date(yr, mo - 1, dy),
+          end: new Date(yr, mo - 1, dy + 1),
+          name: String(h.name || 'Unknown Holiday'),
+          type: String(h.type || 'public'),
+          rule: String(h.rule || '')
+        };
+      });
     } catch (error) {
       console.error('Error retrieving holidays:', error);
       return [];
@@ -156,10 +161,13 @@ class HolidayService {
         // Handle array result (multiple holidays on same day)
         if (Array.isArray(result)) {
           const h = result[0];
+          const dateStr = String(h.date || '');
+          const dateParts = dateStr.split(' ')[0];
+          const [yr, mo, dy] = dateParts.split('-').map(Number);
           return {
-            date: String(h.date || ''),
-            start: new Date(h.start),
-            end: new Date(h.end),
+            date: dateStr,
+            start: new Date(yr, mo - 1, dy),
+            end: new Date(yr, mo - 1, dy + 1),
             name: String(h.name || 'Unknown Holiday'),
             type: String(h.type || 'public'),
             rule: String(h.rule || '')
@@ -175,10 +183,13 @@ class HolidayService {
             rule?: string;
           };
 
+          const dateStr = String(h.date || '');
+          const dateParts = dateStr.split(' ')[0];
+          const [yr, mo, dy] = dateParts.split('-').map(Number);
           return {
-            date: String(h.date || ''),
-            start: new Date(h.start),
-            end: new Date(h.end),
+            date: dateStr,
+            start: new Date(yr, mo - 1, dy),
+            end: new Date(yr, mo - 1, dy + 1),
             name: String(h.name || 'Unknown Holiday'),
             type: String(h.type || 'public'),
             rule: String(h.rule || '')

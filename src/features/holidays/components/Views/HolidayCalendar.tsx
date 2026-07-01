@@ -59,7 +59,7 @@ export const HolidayCalendar: React.FC = () => {
 
         // Get custom holidays for selected country/year
         const customForCountry = customHolidays.filter(
-            (h: CustomHoliday) => h.countryCode === selectedCountry.code && new Date(h.date).getFullYear() === selectedYear
+            (h: CustomHoliday) => h.countryCode === selectedCountry.code && parseInt(h.date.split('-')[0]) === selectedYear
         );
 
         // Filter custom holidays by type
@@ -68,14 +68,17 @@ export const HolidayCalendar: React.FC = () => {
             : customForCountry.filter((h: CustomHoliday) => h.type === filterType);
 
         // Convert custom holidays to Holiday format and merge
-        const customAsHolidays: Holiday[] = filteredCustom.map((ch: CustomHoliday) => ({
-            name: ch.name,
-            type: ch.type,
-            start: new Date(ch.date),
-            end: new Date(ch.date),
-            date: ch.date,
-            rule: `Custom holiday for ${ch.countryCode}`,
-        }));
+        const customAsHolidays: Holiday[] = filteredCustom.map((ch: CustomHoliday) => {
+            const [yr, mo, dy] = ch.date.split('-').map(Number);
+            return {
+                name: ch.name,
+                type: ch.type,
+                start: new Date(yr, mo - 1, dy),
+                end: new Date(yr, mo - 1, dy + 1),
+                date: ch.date,
+                rule: `Custom holiday for ${ch.countryCode}`,
+            };
+        });
 
         return [...filteredOfficial, ...customAsHolidays];
     }, [selectedCountry, selectedYear, filterType, customHolidays]);
